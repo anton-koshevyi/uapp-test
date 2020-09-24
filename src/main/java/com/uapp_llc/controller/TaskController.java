@@ -3,6 +3,7 @@ package com.uapp_llc.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uapp_llc.dto.task.ContentDto;
+import com.uapp_llc.dto.task.ContentDto.CreateTask;
+import com.uapp_llc.dto.task.ContentDto.UpdateTask;
 import com.uapp_llc.dto.task.TaskDto;
 import com.uapp_llc.mapper.TaskMapper;
 import com.uapp_llc.model.Column;
@@ -43,7 +46,7 @@ public class TaskController {
   @PostMapping("/projects/{projectId}/columns/{columnId}/tasks")
   public TaskDto create(@PathVariable Long projectId,
                         @PathVariable Long columnId,
-                        @RequestBody ContentDto dto) {
+                        @Validated(CreateTask.class) @RequestBody ContentDto dto) {
     Column column = columnService.find(projectId, columnId);
     Task task = taskService.create(
         column,
@@ -63,7 +66,7 @@ public class TaskController {
   @PatchMapping("/projects/{projectId}/columns/{columnId}/tasks/{id}")
   public TaskDto update(@PathVariable Long columnId,
                         @PathVariable Long id,
-                        @RequestBody ContentDto dto) {
+                        @Validated(UpdateTask.class) @RequestBody ContentDto dto) {
     Task task = taskService.update(
         id,
         columnId,

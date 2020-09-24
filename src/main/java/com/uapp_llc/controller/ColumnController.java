@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.uapp_llc.dto.column.ColumnDto;
+import com.uapp_llc.dto.column.ContentDto;
+import com.uapp_llc.mapper.ColumnMapper;
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Project;
 import com.uapp_llc.service.ColumnService;
@@ -31,48 +34,48 @@ public class ColumnController {
   }
 
   @GetMapping("/projects/{projectId}/columns")
-  public Page<Column> getAll(@PathVariable Long projectId,
-                             Pageable pageable) {
+  public Page<ColumnDto> getAll(@PathVariable Long projectId,
+                                Pageable pageable) {
     Page<Column> columns = columnService.findAll(projectId, pageable);
-    return columns;
+    return columns.map(ColumnMapper.INSTANCE::toDto);
   }
 
   @PostMapping("/projects/{projectId}/columns")
-  public Column create(@PathVariable Long projectId,
-                       @RequestBody Column dto) {
+  public ColumnDto create(@PathVariable Long projectId,
+                          @RequestBody ContentDto dto) {
     Project project = projectService.find(projectId);
     Column column = columnService.create(
         project,
         dto.getName()
     );
-    return column;
+    return ColumnMapper.INSTANCE.toDto(column);
   }
 
   @GetMapping("/projects/{projectId}/columns/{id}")
-  public Column get(@PathVariable Long projectId,
-                    @PathVariable Long id) {
+  public ColumnDto get(@PathVariable Long projectId,
+                       @PathVariable Long id) {
     Column column = columnService.find(id, projectId);
-    return column;
+    return ColumnMapper.INSTANCE.toDto(column);
   }
 
   @PatchMapping("/projects/{projectId}/columns/{id}")
-  public Column update(@PathVariable Long projectId,
-                       @PathVariable Long id,
-                       @RequestBody Column dto) {
+  public ColumnDto update(@PathVariable Long projectId,
+                          @PathVariable Long id,
+                          @RequestBody ContentDto dto) {
     Column column = columnService.update(
         id,
         projectId,
         dto.getName()
     );
-    return column;
+    return ColumnMapper.INSTANCE.toDto(column);
   }
 
   @PutMapping("/projects/{projectId}/columns/{id}")
-  public Column attachPosition(@PathVariable Long projectId,
-                               @PathVariable Long id,
-                               @RequestParam Integer position) {
+  public ColumnDto attachPosition(@PathVariable Long projectId,
+                                  @PathVariable Long id,
+                                  @RequestParam Integer position) {
     Column column = columnService.changePosition(id, projectId, position);
-    return column;
+    return ColumnMapper.INSTANCE.toDto(column);
   }
 
   @DeleteMapping("/projects/{projectId}/columns/{id}")

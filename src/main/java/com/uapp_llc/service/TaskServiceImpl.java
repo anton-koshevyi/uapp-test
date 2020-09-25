@@ -1,6 +1,5 @@
 package com.uapp_llc.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,37 +45,18 @@ public class TaskServiceImpl implements TaskService {
     return repository.save(entity);
   }
 
-  @Override
-  public Task changePosition(Long id, Long columnId, Integer change) {
-    Task entity = this.find(id, columnId);
-    Column column = entity.getColumn();
-    List<Task> tasks = new ArrayList<>(column.getTasks());
-
-    for (int i = 0; i < tasks.size(); i++) {
-      Task task = tasks.get(i);
-
-      if (id.equals(task.getId())) {
-        try {
-          Collections.swap(tasks, i, change);
-          break;
-        } catch (IndexOutOfBoundsException e) {
-          throw new IllegalActionException(
-              "illegalAction.task.positionOutOfBounds", change);
-        }
-      }
-    }
-
-    column.setTasks(tasks);
-    entity.setColumn(column);
-    return repository.save(entity);
-  }
-
   @Transactional
   @Override
-  public Task changeColumn(Long id, Long actualId, Column change) {
-    Task entity = this.find(id, actualId);
-    entity.setColumn(change);
-    return repository.save(entity);
+  public Task move(Long id, Long columnId, Column newColumn, Integer newPosition) {
+    Task entity = this.find(id, columnId);
+    NullableUtil.set(entity::setColumn, newColumn);
+
+    if (newPosition != null) {
+      Column rearranged = changePosition(entity, newPosition);
+      entity.setColumn(rearranged);
+    }
+
+    return entity;
   }
 
   @Override
@@ -96,6 +76,28 @@ public class TaskServiceImpl implements TaskService {
   public void delete(Long id, Long columnId) {
     Task entity = this.find(id, columnId);
     repository.delete(entity);
+  }
+
+  private Column changePosition(Task entity, int position) {
+    Long id = entity.getId();
+    Column column = entity.getColumn();
+    List<Task> tasks = column.getTasks();
+
+    for (int i = 0; i < tasks.size(); i++) {
+      Task task = tasks.get(i);
+
+      if (id.equals(task.getId())) {
+        try {
+          Collections.swap(tasks, i, position);
+          break;
+        } catch (IndexOutOfBoundsException e) {
+          throw new IllegalActionException(
+              "illegalAction.task.positionOutOfBounds", position);
+        }
+      }
+    }
+
+    return column;
   }
 
 }

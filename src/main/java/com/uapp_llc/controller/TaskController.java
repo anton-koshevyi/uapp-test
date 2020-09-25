@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uapp_llc.dto.task.ContentDto;
 import com.uapp_llc.dto.task.ContentDto.CreateTask;
 import com.uapp_llc.dto.task.ContentDto.UpdateTask;
+import com.uapp_llc.dto.task.MoveDto;
 import com.uapp_llc.dto.task.TaskDto;
 import com.uapp_llc.mapper.TaskMapper;
 import com.uapp_llc.model.Column;
@@ -77,20 +77,19 @@ public class TaskController {
   }
 
   @PutMapping("/projects/{projectId}/columns/{columnId}/tasks/{id}")
-  public TaskDto attachPosition(@PathVariable Long columnId,
-                                @PathVariable Long id,
-                                @RequestParam Integer position) {
-    Task task = taskService.changePosition(id, columnId, position);
-    return TaskMapper.INSTANCE.toDto(task);
-  }
-
-  @PutMapping("/projects/{projectId}/columns/{columnId}/tasks/{id}")
   public TaskDto attachColumn(@PathVariable Long projectId,
-                              @PathVariable("columnId") Long actualId,
+                              @PathVariable Long columnId,
                               @PathVariable Long id,
-                              @RequestParam("column") Long changeId) {
-    Column change = columnService.find(changeId, projectId);
-    Task task = taskService.changeColumn(id, actualId, change);
+                              @RequestBody MoveDto dto) {
+    Column newColumn = (dto.getColumnId() != null)
+        ? columnService.find(columnId, projectId)
+        : null;
+    Task task = taskService.move(
+        id,
+        columnId,
+        newColumn,
+        dto.getPosition()
+    );
     return TaskMapper.INSTANCE.toDto(task);
   }
 

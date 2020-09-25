@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uapp_llc.dto.column.ColumnDto;
 import com.uapp_llc.dto.column.ContentDto;
 import com.uapp_llc.dto.column.ContentDto.CreateColumn;
 import com.uapp_llc.dto.column.ContentDto.UpdateColumn;
+import com.uapp_llc.dto.column.MoveDto;
 import com.uapp_llc.mapper.ColumnMapper;
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Project;
@@ -76,8 +76,8 @@ public class ColumnController {
   @PutMapping("/projects/{projectId}/columns/{id}")
   public ColumnDto changeIndex(@PathVariable Long projectId,
                                @PathVariable Long id,
-                               @RequestParam Integer index) {
-    Column column = columnService.changeIndex(id, projectId, index);
+                               @RequestBody MoveDto dto) {
+    Column column = columnService.changeIndex(id, projectId, dto.getNewIndex());
     return ColumnMapper.INSTANCE.toDto(column);
   }
 

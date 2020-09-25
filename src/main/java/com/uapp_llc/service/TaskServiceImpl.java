@@ -1,6 +1,5 @@
 package com.uapp_llc.service;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Task;
 import com.uapp_llc.repository.TaskRepository;
+import com.uapp_llc.util.CollectionUtil;
 import com.uapp_llc.util.NullableUtil;
 
 @Service
@@ -88,7 +88,8 @@ public class TaskServiceImpl implements TaskService {
 
       if (id.equals(task.getId())) {
         try {
-          Collections.swap(tasks, i, index);
+          List<Task> rearranged = CollectionUtil.move(tasks, i, index);
+          column.setTasks(rearranged);
           break;
         } catch (IndexOutOfBoundsException e) {
           throw new IllegalActionException(

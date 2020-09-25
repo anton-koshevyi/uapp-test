@@ -1,6 +1,5 @@
 package com.uapp_llc.service;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Project;
 import com.uapp_llc.repository.ColumnRepository;
+import com.uapp_llc.util.CollectionUtil;
 import com.uapp_llc.util.NullableUtil;
 
 @Service
@@ -50,11 +50,12 @@ public class ColumnServiceImpl implements ColumnService {
     List<Column> columns = project.getColumns();
 
     for (int i = 0; i < columns.size(); i++) {
-      Column task = columns.get(i);
+      Column column = columns.get(i);
 
-      if (id.equals(task.getId())) {
+      if (id.equals(column.getId())) {
         try {
-          Collections.swap(columns, i, index);
+          List<Column> rearranged = CollectionUtil.move(columns, i, index);
+          project.setColumns(rearranged);
           break;
         } catch (IndexOutOfBoundsException e) {
           throw new IllegalActionException(

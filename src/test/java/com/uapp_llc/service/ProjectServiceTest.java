@@ -68,7 +68,6 @@ public class ProjectServiceTest {
         .isExactlyInstanceOf(NotFoundException.class)
         .hasFieldOrPropertyWithValue("getCodes", new Object[]{"notFound.project.byId"})
         .hasFieldOrPropertyWithValue("getArguments", new Object[]{1L});
-
   }
 
   @Test

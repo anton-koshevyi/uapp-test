@@ -3,6 +3,9 @@ package com.uapp_llc.test.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.uapp_llc.model.Project;
+import com.uapp_llc.test.model.project.ProjectFactory;
+
 public final class ModelFactoryProducer {
 
   private static final Map<String, ModelFactory<?>> typeFactories = new HashMap<>();
@@ -18,6 +21,9 @@ public final class ModelFactoryProducer {
     String typeName = type.getName();
 
     if (!typeFactories.containsKey(typeName)) {
+      if (Project.class.equals(type)) {
+        typeFactories.put(typeName, new ProjectFactory());
+      }
     }
 
     return (ModelFactory<T>) typeFactories.get(typeName);

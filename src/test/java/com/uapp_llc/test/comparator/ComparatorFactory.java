@@ -4,6 +4,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.uapp_llc.model.Project;
+
 public final class ComparatorFactory {
 
   private static final Map<String, Comparator<?>> typeComparators = new HashMap<>();
@@ -19,6 +21,9 @@ public final class ComparatorFactory {
     String typeName = type.getName();
 
     if (!typeComparators.containsKey(typeName)) {
+      if (Project.class.equals(type)) {
+        typeComparators.put(typeName, new ProjectComparator());
+      }
     }
 
     return (Comparator<T>) typeComparators.get(typeName);

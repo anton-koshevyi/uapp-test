@@ -11,7 +11,6 @@ import javax.validation.constraints.Size;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Size(min = 1, max = 50)
-@javax.validation.constraints.Email
 @Constraint(validatedBy = {})
 public @interface TaskName {
 

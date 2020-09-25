@@ -3,7 +3,9 @@ package com.uapp_llc.test.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Project;
+import com.uapp_llc.test.model.column.ColumnFactory;
 import com.uapp_llc.test.model.project.ProjectFactory;
 
 public final class ModelFactoryProducer {
@@ -23,6 +25,10 @@ public final class ModelFactoryProducer {
     if (!typeFactories.containsKey(typeName)) {
       if (Project.class.equals(type)) {
         typeFactories.put(typeName, new ProjectFactory());
+      }
+
+      if (Column.class.equals(type)) {
+        typeFactories.put(typeName, new ColumnFactory());
       }
     }
 

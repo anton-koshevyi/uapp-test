@@ -74,10 +74,10 @@ public class ColumnController {
   }
 
   @PutMapping("/projects/{projectId}/columns/{id}")
-  public ColumnDto attachPosition(@PathVariable Long projectId,
-                                  @PathVariable Long id,
-                                  @RequestParam Integer position) {
-    Column column = columnService.changePosition(id, projectId, position);
+  public ColumnDto changeIndex(@PathVariable Long projectId,
+                               @PathVariable Long id,
+                               @RequestParam Integer index) {
+    Column column = columnService.changeIndex(id, projectId, index);
     return ColumnMapper.INSTANCE.toDto(column);
   }
 

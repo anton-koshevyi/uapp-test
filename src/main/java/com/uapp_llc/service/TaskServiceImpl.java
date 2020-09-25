@@ -47,12 +47,12 @@ public class TaskServiceImpl implements TaskService {
 
   @Transactional
   @Override
-  public Task move(Long id, Long columnId, Column newColumn, Integer newPosition) {
+  public Task move(Long id, Long columnId, Column newColumn, Integer newIndex) {
     Task entity = this.find(id, columnId);
     NullableUtil.set(entity::setColumn, newColumn);
 
-    if (newPosition != null) {
-      Column rearranged = changePosition(entity, newPosition);
+    if (newIndex != null) {
+      Column rearranged = changeIndex(entity, newIndex);
       entity.setColumn(rearranged);
     }
 
@@ -63,7 +63,7 @@ public class TaskServiceImpl implements TaskService {
   public Task find(Long id, Long columnId) {
     return repository.findByIdAndColumnId(id, columnId)
         .orElseThrow(() -> new NotFoundException(
-            "notFound.task.byIdAndColumn", id, columnId));
+            "notFound.task.byIdAndColumnId", id, columnId));
   }
 
   @Override
@@ -78,7 +78,7 @@ public class TaskServiceImpl implements TaskService {
     repository.delete(entity);
   }
 
-  private Column changePosition(Task entity, int position) {
+  private Column changeIndex(Task entity, int index) {
     Long id = entity.getId();
     Column column = entity.getColumn();
     List<Task> tasks = column.getTasks();
@@ -88,11 +88,11 @@ public class TaskServiceImpl implements TaskService {
 
       if (id.equals(task.getId())) {
         try {
-          Collections.swap(tasks, i, position);
+          Collections.swap(tasks, i, index);
           break;
         } catch (IndexOutOfBoundsException e) {
           throw new IllegalActionException(
-              "illegalAction.task.positionOutOfBounds", position);
+              "illegalAction.task.indexOutOfBounds", index);
         }
       }
     }

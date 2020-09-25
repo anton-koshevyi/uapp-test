@@ -12,7 +12,7 @@ public interface TaskService {
 
   Task update(Long id, Long columnId, String name, String description);
 
-  Task move(Long id, Long columnId, Column newColumn, Integer newPosition);
+  Task move(Long id, Long columnId, Column newColumn, Integer newIndex);
 
   Task find(Long id, Long columnId);
 

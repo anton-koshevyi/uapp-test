@@ -12,7 +12,7 @@ public interface ColumnService {
 
   Column update(Long id, Long projectId, String name);
 
-  Column changePosition(Long id, Long projectId, Integer change);
+  Column changeIndex(Long id, Long projectId, Integer index);
 
   Column find(Long id, Long projectId);
 

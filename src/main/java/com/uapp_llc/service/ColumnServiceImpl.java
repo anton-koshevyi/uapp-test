@@ -1,6 +1,5 @@
 package com.uapp_llc.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,26 +44,25 @@ public class ColumnServiceImpl implements ColumnService {
   }
 
   @Override
-  public Column changePosition(Long id, Long projectId, Integer change) {
+  public Column changeIndex(Long id, Long projectId, Integer index) {
     Column entity = this.find(id, projectId);
     Project project = entity.getProject();
-    List<Column> columns = new ArrayList<>(project.getColumns());
+    List<Column> columns = project.getColumns();
 
     for (int i = 0; i < columns.size(); i++) {
       Column task = columns.get(i);
 
       if (id.equals(task.getId())) {
         try {
-          Collections.swap(columns, i, change);
+          Collections.swap(columns, i, index);
           break;
         } catch (IndexOutOfBoundsException e) {
           throw new IllegalActionException(
-              "illegalAction.column.positionOutOfBounds", change);
+              "illegalAction.column.indexOutOfBounds", index);
         }
       }
     }
 
-    project.setColumns(columns);
     entity.setProject(project);
     return repository.save(entity);
   }
@@ -73,7 +71,7 @@ public class ColumnServiceImpl implements ColumnService {
   public Column find(Long id, Long projectId) {
     return repository.findByIdAndProjectId(id, projectId)
         .orElseThrow(() -> new NotFoundException(
-            "notFound.column.byIdAndProject", id, projectId));
+            "notFound.column.byIdAndProjectId", id, projectId));
   }
 
   @Override

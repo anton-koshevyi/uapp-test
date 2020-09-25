@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class MoveDto {
 
-  private Integer position;
+  private Integer index;
   private Long columnId;
 
 }

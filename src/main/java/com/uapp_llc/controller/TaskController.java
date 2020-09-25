@@ -77,10 +77,10 @@ public class TaskController {
   }
 
   @PutMapping("/projects/{projectId}/columns/{columnId}/tasks/{id}")
-  public TaskDto attachColumn(@PathVariable Long projectId,
-                              @PathVariable Long columnId,
-                              @PathVariable Long id,
-                              @RequestBody MoveDto dto) {
+  public TaskDto move(@PathVariable Long projectId,
+                      @PathVariable Long columnId,
+                      @PathVariable Long id,
+                      @RequestBody MoveDto dto) {
     Column newColumn = (dto.getColumnId() != null)
         ? columnService.find(columnId, projectId)
         : null;
@@ -88,7 +88,7 @@ public class TaskController {
         id,
         columnId,
         newColumn,
-        dto.getPosition()
+        dto.getIndex()
     );
     return TaskMapper.INSTANCE.toDto(task);
   }

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Project;
+import com.uapp_llc.model.Task;
 
 public final class ComparatorFactory {
 
@@ -29,6 +30,12 @@ public final class ComparatorFactory {
       if (Column.class.equals(type)) {
         typeComparators.put(typeName, new ColumnComparator(
             ComparatorFactory.getComparator(Project.class)
+        ));
+      }
+
+      if (Task.class.equals(type)) {
+        typeComparators.put(typeName, new TaskComparator(
+            ComparatorFactory.getComparator(Column.class)
         ));
       }
     }

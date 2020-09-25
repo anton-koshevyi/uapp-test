@@ -5,8 +5,10 @@ import java.util.Map;
 
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Project;
+import com.uapp_llc.model.Task;
 import com.uapp_llc.test.model.column.ColumnFactory;
 import com.uapp_llc.test.model.project.ProjectFactory;
+import com.uapp_llc.test.model.task.TaskFactory;
 
 public final class ModelFactoryProducer {
 
@@ -29,6 +31,10 @@ public final class ModelFactoryProducer {
 
       if (Column.class.equals(type)) {
         typeFactories.put(typeName, new ColumnFactory());
+      }
+
+      if (Task.class.equals(type)) {
+        typeFactories.put(typeName, new TaskFactory());
       }
     }
 

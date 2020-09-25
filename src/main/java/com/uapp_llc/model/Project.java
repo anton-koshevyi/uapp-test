@@ -1,5 +1,6 @@
 package com.uapp_llc.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -24,6 +25,6 @@ public class Project {
   private Long id;
 
   @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
-  private List<Column> columns;
+  private List<Column> columns = new ArrayList<>();
 
 }

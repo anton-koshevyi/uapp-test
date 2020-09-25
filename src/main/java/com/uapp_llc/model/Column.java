@@ -1,5 +1,6 @@
 package com.uapp_llc.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -29,7 +30,7 @@ public class Column {
   private String name;
 
   @OneToMany(mappedBy = "column", cascade = CascadeType.REMOVE)
-  private List<Task> tasks;
+  private List<Task> tasks = new ArrayList<>();
 
   @ManyToOne(cascade = CascadeType.MERGE)
   @JoinColumn(name = "project_id")

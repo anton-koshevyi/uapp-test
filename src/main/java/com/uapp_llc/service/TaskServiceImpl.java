@@ -56,7 +56,7 @@ public class TaskServiceImpl implements TaskService {
       entity.setColumn(rearranged);
     }
 
-    return entity;
+    return repository.save(entity);
   }
 
   @Override

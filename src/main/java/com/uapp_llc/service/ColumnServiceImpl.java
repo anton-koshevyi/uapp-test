@@ -43,6 +43,7 @@ public class ColumnServiceImpl implements ColumnService {
     return repository.save(entity);
   }
 
+  @Transactional
   @Override
   public Column changeIndex(Long id, Long projectId, Integer index) {
     Column entity = this.find(id, projectId);

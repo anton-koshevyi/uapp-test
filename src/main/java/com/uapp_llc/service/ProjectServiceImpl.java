@@ -2,6 +2,7 @@ package com.uapp_llc.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Project;
@@ -17,6 +18,7 @@ public class ProjectServiceImpl implements ProjectService {
     this.repository = repository;
   }
 
+  @Transactional
   @Override
   public Project create() {
     Project entity = new Project();
@@ -29,6 +31,7 @@ public class ProjectServiceImpl implements ProjectService {
         .orElseThrow(() -> new NotFoundException("notFound.project.byId", id));
   }
 
+  @Transactional
   @Override
   public void delete(Long id) {
     Project entity = this.find(id);

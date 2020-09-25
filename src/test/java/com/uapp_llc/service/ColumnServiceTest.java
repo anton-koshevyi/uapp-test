@@ -1,11 +1,12 @@
 package com.uapp_llc.service;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 
+import com.uapp_llc.exception.IllegalActionException;
 import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Project;
@@ -15,8 +16,6 @@ import com.uapp_llc.test.model.column.ColumnType;
 import com.uapp_llc.test.model.project.ProjectType;
 import com.uapp_llc.test.stub.repository.ColumnRepositoryStub;
 import com.uapp_llc.test.stub.repository.identification.IdentificationContext;
-
-// TODO: Test changeIndex method
 
 public class ColumnServiceTest {
 
@@ -92,18 +91,72 @@ public class ColumnServiceTest {
   }
 
   @Test
-  @Disabled
   public void changeIndex_whenNoEntityWithIdAndProjectId_expectException() {
+    Assertions
+        .assertThatThrownBy(() -> service.changeIndex(2L, 1L, 0))
+        .isExactlyInstanceOf(NotFoundException.class)
+        .hasFieldOrPropertyWithValue("getCodes",
+            new Object[]{"notFound.column.byIdAndProjectId"})
+        .hasFieldOrPropertyWithValue("getArguments", new Object[]{2L, 1L});
   }
 
   @Test
-  @Disabled
   public void changeIndex_whenIndexOutOfBounds_expectException() {
+    Project project = ModelFactoryProducer.getFactory(Project.class)
+        .createModel(ProjectType.DEFAULT)
+        .setId(1L);
+    identification.setStrategy(e -> e.setId(1L));
+    Column monday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.MONDAY)
+        .setProject(project));
+    identification.setStrategy(e -> e.setId(2L));
+    Column wednesday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.WEDNESDAY)
+        .setProject(project));
+    project.setColumns(Lists.newArrayList(monday, wednesday));
+
+    Assertions
+        .assertThatThrownBy(() -> service.changeIndex(2L, 1L, -1))
+        .isExactlyInstanceOf(IllegalActionException.class)
+        .hasFieldOrPropertyWithValue("getCodes",
+            new Object[]{"illegalAction.column.indexOutOfBounds"})
+        .hasFieldOrPropertyWithValue("getArguments", new Object[]{-1});
   }
 
   @Test
-  @Disabled
   public void changeIndex() {
+    Project project = ModelFactoryProducer.getFactory(Project.class)
+        .createModel(ProjectType.DEFAULT)
+        .setId(1L);
+    identification.setStrategy(e -> e.setId(1L));
+    Column monday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.MONDAY)
+        .setProject(project));
+    identification.setStrategy(e -> e.setId(2L));
+    Column wednesday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.WEDNESDAY)
+        .setProject(project));
+    project.setColumns(Lists.newArrayList(monday, wednesday));
+
+    service.changeIndex(2L, 1L, 0);
+
+    Assertions
+        .assertThat(project.getColumns())
+        .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
+        .containsExactly(
+            ModelFactoryProducer.getFactory(Column.class)
+                .createModel(ColumnType.WEDNESDAY)
+                .setId(2L)
+                .setProject(ModelFactoryProducer.getFactory(Project.class)
+                    .createModel(ProjectType.DEFAULT)
+                    .setId(1L)),
+            ModelFactoryProducer.getFactory(Column.class)
+                .createModel(ColumnType.MONDAY)
+                .setId(1L)
+                .setProject(ModelFactoryProducer.getFactory(Project.class)
+                    .createModel(ProjectType.DEFAULT)
+                    .setId(1L))
+        );
   }
 
   @Test
@@ -181,10 +234,10 @@ public class ColumnServiceTest {
 
   @Test
   public void delete() {
-    identification.setStrategy(e -> e.setId(1L));
     Project project = ModelFactoryProducer.getFactory(Project.class)
         .createModel(ProjectType.DEFAULT)
         .setId(2L);
+    identification.setStrategy(e -> e.setId(1L));
     repository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
         .setProject(project));

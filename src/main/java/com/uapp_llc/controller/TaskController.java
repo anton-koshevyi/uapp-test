@@ -81,14 +81,15 @@ public class TaskController {
                       @PathVariable Long columnId,
                       @PathVariable Long id,
                       @RequestBody MoveDto dto) {
-    Column newColumn = (dto.getColumnId() != null)
-        ? columnService.find(columnId, projectId)
+    Long newColumnId = dto.getNewColumnId();
+    Column newColumn = (newColumnId != null)
+        ? columnService.find(newColumnId, projectId)
         : null;
     Task task = taskService.move(
         id,
         columnId,
         newColumn,
-        dto.getIndex()
+        dto.getNewIndex()
     );
     return TaskMapper.INSTANCE.toDto(task);
   }

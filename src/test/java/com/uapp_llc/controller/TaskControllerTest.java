@@ -14,12 +14,12 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.data.web.config.SpringDataWebConfiguration;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Task;
@@ -61,8 +61,7 @@ public class TaskControllerTest {
     webContext.setParent(appContext);
     webContext.addBeanFactoryPostProcessor(new LazyInitBeanFactoryPostProcessor());
     webContext.setServletContext(new MockServletContext());
-    webContext.register(WebMvcConfigurationSupport.class);
-    webContext.register(SpringDataWebConfiguration.class);
+    webContext.register(TestConfig.class);
     webContext.register(TaskController.class);
     webContext.refresh();
 
@@ -305,6 +304,12 @@ public class TaskControllerTest {
     Assertions
         .assertThat(taskRepository.find(1L))
         .isNull();
+  }
+
+
+  @EnableWebMvc
+  @EnableSpringDataWebSupport
+  private static class TestConfig {
   }
 
 }

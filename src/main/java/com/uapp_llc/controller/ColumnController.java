@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uapp_llc.dto.column.ColumnDto;
@@ -32,8 +31,7 @@ public class ColumnController {
   }
 
   @GetMapping("/columns")
-  public Page<ColumnDto> getAll(@RequestParam(required = false)
-                                @PageableDefault(sort = "index") Pageable pageable) {
+  public Page<ColumnDto> getAll(@PageableDefault(sort = "index") Pageable pageable) {
     Page<Column> columns = columnService.findAll(pageable);
     return columns.map(ColumnMapper.INSTANCE::toDto);
   }

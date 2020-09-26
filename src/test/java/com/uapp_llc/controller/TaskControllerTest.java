@@ -6,14 +6,15 @@ import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.data.web.config.SpringDataWebConfiguration;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -61,6 +62,7 @@ public class TaskControllerTest {
     webContext.addBeanFactoryPostProcessor(new LazyInitBeanFactoryPostProcessor());
     webContext.setServletContext(new MockServletContext());
     webContext.register(WebMvcConfigurationSupport.class);
+    webContext.register(SpringDataWebConfiguration.class);
     webContext.register(TaskController.class);
     webContext.refresh();
 
@@ -71,7 +73,6 @@ public class TaskControllerTest {
   }
 
   @Test
-  @Disabled("Configure org.springframework.data.web.config.SpringDataWebConfiguration")
   public void getAll() throws JSONException {
     columnIdentification.setStrategy(e -> e.setId(1L));
     Column column = columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
@@ -81,7 +82,7 @@ public class TaskControllerTest {
         .createModel(TaskType.JOB)
         .setColumn(column));
 
-    String actual = RestAssuredMockMvc
+    String response = RestAssuredMockMvc
         .given()
         .header("Accept", "application/json")
         .when()
@@ -90,6 +91,9 @@ public class TaskControllerTest {
         .statusCode(HttpServletResponse.SC_OK)
         .extract()
         .asString();
+    String actual = new JSONObject(response)
+        .getJSONArray("content")
+        .toString();
 
     String expected = "[{"
         + "id: 1,"
@@ -103,9 +107,10 @@ public class TaskControllerTest {
         + "  index: 0"
         + "}"
         + "}]";
+    // For some reason fails when not strict array ordering
     JSONAssert
-        .assertEquals(expected, actual, new CustomComparator(JSONCompareMode.NON_EXTENSIBLE,
-            new Customization("**.createdAt", (act, exp) -> act != null)
+        .assertEquals(expected, actual, new CustomComparator(JSONCompareMode.STRICT,
+            new Customization("[*].createdAt", (act, exp) -> act != null)
         ));
   }
 

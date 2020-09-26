@@ -7,11 +7,11 @@ import org.assertj.core.api.Assertions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.data.web.config.SpringDataWebConfiguration;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -22,7 +22,6 @@ import com.uapp_llc.model.Column;
 import com.uapp_llc.repository.ColumnRepository;
 import com.uapp_llc.service.ColumnServiceImpl;
 import com.uapp_llc.test.LazyInitBeanFactoryPostProcessor;
-import com.uapp_llc.test.comparator.ComparatorFactory;
 import com.uapp_llc.test.model.ModelFactoryProducer;
 import com.uapp_llc.test.model.column.ColumnType;
 import com.uapp_llc.test.stub.repository.ColumnRepositoryStub;
@@ -49,6 +48,7 @@ public class ColumnControllerTest {
     webContext.addBeanFactoryPostProcessor(new LazyInitBeanFactoryPostProcessor());
     webContext.setServletContext(new MockServletContext());
     webContext.register(WebMvcConfigurationSupport.class);
+    webContext.register(SpringDataWebConfiguration.class);
     webContext.register(ColumnController.class);
     webContext.refresh();
 
@@ -59,7 +59,6 @@ public class ColumnControllerTest {
   }
 
   @Test
-  @Disabled("Configure org.springframework.data.web.config.SpringDataWebConfiguration")
   public void getAll() throws JSONException {
     columnIdentification.setStrategy(e -> e.setId(1L));
     columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
@@ -81,7 +80,7 @@ public class ColumnControllerTest {
     String expected = "[{"
         + "id: 1,"
         + "name: 'Monday tasks',"
-        + "projectId: 1"
+        + "index: 0"
         + "}]";
     JSONAssert
         .assertEquals(expected, actual, JSONCompareMode.NON_EXTENSIBLE);
@@ -165,7 +164,7 @@ public class ColumnControllerTest {
   }
 
   @Test
-  public void changeIndex() {
+  public void changeIndex() throws JSONException {
     columnIdentification.setStrategy(e -> e.setId(1L));
     columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
@@ -175,7 +174,7 @@ public class ColumnControllerTest {
         .createModel(ColumnType.WEDNESDAY)
         .setIndex(1));
 
-    RestAssuredMockMvc
+    String actual = RestAssuredMockMvc
         .given()
         .header("Accept", "application/json")
         .header("Content-Type", "application/json")
@@ -183,21 +182,17 @@ public class ColumnControllerTest {
         .when()
         .put("/columns/{id}", 1)
         .then()
-        .statusCode(HttpServletResponse.SC_OK);
+        .statusCode(HttpServletResponse.SC_OK)
+        .extract()
+        .asString();
 
-    Assertions
-        .assertThat(columnRepository.findAll())
-        .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
-        .containsExactlyInAnyOrder(
-            ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.MONDAY)
-                .setId(1L)
-                .setIndex(1),
-            ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.WEDNESDAY)
-                .setId(2L)
-                .setIndex(0)
-        );
+    String expected = "{"
+        + "id: 1,"
+        + "name: 'Monday tasks',"
+        + "index: 1"
+        + "}";
+    JSONAssert
+        .assertEquals(expected, actual, JSONCompareMode.NON_EXTENSIBLE);
   }
 
   @Test
@@ -207,9 +202,6 @@ public class ColumnControllerTest {
         .createModel(ColumnType.MONDAY));
 
     RestAssuredMockMvc
-        .given()
-        .header("Accept", "application/json")
-        .when()
         .delete("/columns/{id}", 1)
         .then()
         .statusCode(HttpServletResponse.SC_OK);

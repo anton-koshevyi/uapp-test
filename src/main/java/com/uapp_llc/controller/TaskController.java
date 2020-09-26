@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uapp_llc.dto.task.ContentDto;
@@ -36,6 +37,7 @@ public class TaskController {
 
   @GetMapping("/columns/{columnId}/tasks")
   public Page<TaskDto> getAll(@PathVariable Long columnId,
+                              @RequestParam(required = false)
                               @PageableDefault(sort = "index") Pageable pageable) {
     Page<Task> tasks = taskService.findAll(columnId, pageable);
     return tasks.map(TaskMapper.INSTANCE::toDto);

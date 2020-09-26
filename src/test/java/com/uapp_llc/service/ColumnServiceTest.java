@@ -1,7 +1,6 @@
 package com.uapp_llc.service;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,11 +10,9 @@ import org.springframework.data.domain.Pageable;
 import com.uapp_llc.exception.IllegalActionException;
 import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Column;
-import com.uapp_llc.model.Project;
 import com.uapp_llc.test.comparator.ComparatorFactory;
 import com.uapp_llc.test.model.ModelFactoryProducer;
 import com.uapp_llc.test.model.column.ColumnType;
-import com.uapp_llc.test.model.project.ProjectType;
 import com.uapp_llc.test.stub.repository.ColumnRepositoryStub;
 import com.uapp_llc.test.stub.repository.identification.IdentificationContext;
 
@@ -35,12 +32,8 @@ public class ColumnServiceTest {
   @Test
   public void create() {
     identification.setStrategy(e -> e.setId(1L));
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(2L);
 
     service.create(
-        project,
         "Monday tasks"
     );
 
@@ -50,32 +43,25 @@ public class ColumnServiceTest {
         .isEqualTo(new Column()
             .setId(1L)
             .setName("Monday tasks")
-            .setIndex(0)
-            .setProject(ModelFactoryProducer.getFactory(Project.class)
-                .createModel(ProjectType.DEFAULT)
-                .setId(2L)));
+            .setIndex(0));
   }
 
   @Test
   public void update_whenNoEntityWithIdAndProjectId_expectException() {
     Assertions
-        .assertThatThrownBy(() -> service.update(1L, 2L, "Tuesday tasks"))
+        .assertThatThrownBy(() -> service.update(1L, "Tuesday tasks"))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasMessage("No column for id '1' and project id '2'");
+        .hasMessage("No column for id '1'");
   }
 
   @Test
   public void update() {
     identification.setStrategy(e -> e.setId(1L));
     repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setProject(ModelFactoryProducer.getFactory(Project.class)
-            .createModel(ProjectType.DEFAULT)
-            .setId(2L)));
+        .createModel(ColumnType.MONDAY));
 
     service.update(
         1L,
-        2L,
         "Tuesday tasks"
     );
 
@@ -85,60 +71,45 @@ public class ColumnServiceTest {
         .isEqualTo(ModelFactoryProducer.getFactory(Column.class)
             .createModel(ColumnType.MONDAY)
             .setId(1L)
-            .setName("Tuesday tasks")
-            .setProject(ModelFactoryProducer.getFactory(Project.class)
-                .createModel(ProjectType.DEFAULT)
-                .setId(2L)));
+            .setName("Tuesday tasks"));
   }
 
   @Test
   public void changeIndex_whenNoEntityWithIdAndProjectId_expectException() {
     Assertions
-        .assertThatThrownBy(() -> service.changeIndex(2L, 1L, 0))
+        .assertThatThrownBy(() -> service.changeIndex(1L, 0))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasMessage("No column for id '2' and project id '1'");
+        .hasMessage("No column for id '1'");
   }
 
   @ParameterizedTest
   @ValueSource(ints = {-1, 2})
   public void changeIndex_whenIndexOutOfBounds_expectException(int newIndex) {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     identification.setStrategy(e -> e.setId(1L));
-    Column monday = repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setProject(project));
+    repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.MONDAY));
     identification.setStrategy(e -> e.setId(2L));
-    Column wednesday = repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.WEDNESDAY)
-        .setProject(project));
-    project.setColumns(Lists.newArrayList(monday, wednesday));
+    repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.WEDNESDAY));
 
     Assertions
-        .assertThatThrownBy(() -> service.changeIndex(2L, 1L, newIndex))
+        .assertThatThrownBy(() -> service.changeIndex(1L, newIndex))
         .isExactlyInstanceOf(IllegalActionException.class)
         .hasMessage("New column index out of bounds: " + newIndex);
   }
 
   @Test
   public void changeIndex_whenIndexEqualToActual_expectNoChanges() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     identification.setStrategy(e -> e.setId(1L));
-    Column monday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+    repository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setIndex(0)
-        .setProject(project));
+        .setIndex(0));
     identification.setStrategy(e -> e.setId(2L));
-    Column wednesday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+    repository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.WEDNESDAY)
-        .setIndex(1)
-        .setProject(project));
-    project.setColumns(Lists.newArrayList(monday, wednesday));
+        .setIndex(1));
 
-    service.changeIndex(1L, 1L, 0);
+    service.changeIndex(1L, 0);
 
     Assertions
         .assertThat(repository.findAll())
@@ -147,38 +118,26 @@ public class ColumnServiceTest {
             ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.MONDAY)
                 .setId(1L)
-                .setIndex(0)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(1L)),
+                .setIndex(0),
             ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.WEDNESDAY)
                 .setId(2L)
                 .setIndex(1)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(1L))
         );
   }
 
   @Test
   public void changeIndex_whenIndexAfterActual() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     identification.setStrategy(e -> e.setId(1L));
-    Column monday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+    repository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setIndex(0)
-        .setProject(project));
+        .setIndex(0));
     identification.setStrategy(e -> e.setId(2L));
-    Column wednesday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+    repository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.WEDNESDAY)
-        .setIndex(1)
-        .setProject(project));
-    project.setColumns(Lists.newArrayList(monday, wednesday));
+        .setIndex(1));
 
-    service.changeIndex(2L, 1L, 0);
+    service.changeIndex(2L, 0);
 
     Assertions
         .assertThat(repository.findAll())
@@ -187,38 +146,26 @@ public class ColumnServiceTest {
             ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.MONDAY)
                 .setId(1L)
-                .setIndex(1)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(1L)),
+                .setIndex(1),
             ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.WEDNESDAY)
                 .setId(2L)
                 .setIndex(0)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(1L))
         );
   }
 
   @Test
   public void changeIndex_whenIndexBeforeActual() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     identification.setStrategy(e -> e.setId(1L));
-    Column monday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+    repository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setIndex(0)
-        .setProject(project));
+        .setIndex(0));
     identification.setStrategy(e -> e.setId(2L));
-    Column wednesday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+    repository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.WEDNESDAY)
-        .setIndex(1)
-        .setProject(project));
-    project.setColumns(Lists.newArrayList(monday, wednesday));
+        .setIndex(1));
 
-    service.changeIndex(1L, 1L, 1);
+    service.changeIndex(1L, 1);
 
     Assertions
         .assertThat(repository.findAll())
@@ -227,100 +174,73 @@ public class ColumnServiceTest {
             ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.MONDAY)
                 .setId(1L)
-                .setIndex(1)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(1L)),
+                .setIndex(1),
             ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.WEDNESDAY)
                 .setId(2L)
                 .setIndex(0)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(1L))
         );
   }
 
   @Test
   public void find_whenNoEntityWithIdAndProjectId_expectException() {
     Assertions
-        .assertThatThrownBy(() -> service.find(1L, 2L))
+        .assertThatThrownBy(() -> service.find(1L))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasMessage("No column for id '1' and project id '2'");
+        .hasMessage("No column for id '1'");
   }
 
   @Test
   public void find() {
     identification.setStrategy(e -> e.setId(1L));
     repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setProject(ModelFactoryProducer.getFactory(Project.class)
-            .createModel(ProjectType.DEFAULT)
-            .setId(2L)));
+        .createModel(ColumnType.MONDAY));
 
     Assertions
-        .assertThat(service.find(1L, 2L))
+        .assertThat(service.find(1L))
         .usingComparator(ComparatorFactory.getComparator(Column.class))
         .isEqualTo(ModelFactoryProducer.getFactory(Column.class)
             .createModel(ColumnType.MONDAY)
-            .setId(1L)
-            .setProject(ModelFactoryProducer.getFactory(Project.class)
-                .createModel(ProjectType.DEFAULT)
-                .setId(2L)));
+            .setId(1L));
   }
 
   @Test
   public void findAll() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(2L);
     identification.setStrategy(e -> e.setId(1L));
     repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setProject(project));
+        .createModel(ColumnType.MONDAY));
     identification.setStrategy(e -> e.setId(2L));
     repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.WEDNESDAY)
-        .setProject(project));
+        .createModel(ColumnType.WEDNESDAY));
 
     Assertions
-        .assertThat(service.findAll(2L, Pageable.unpaged()))
+        .assertThat(service.findAll(Pageable.unpaged()))
         .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
         .containsExactlyInAnyOrder(
             ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.MONDAY)
-                .setId(1L)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(2L)),
+                .setId(1L),
             ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.WEDNESDAY)
                 .setId(2L)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(2L))
         );
   }
 
   @Test
   public void delete_whenNoEntityWithIdAndProjectId_expectException() {
     Assertions
-        .assertThatThrownBy(() -> service.delete(1L, 2L))
+        .assertThatThrownBy(() -> service.delete(1L))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasMessage("No column for id '1' and project id '2'");
+        .hasMessage("No column for id '1'");
   }
 
   @Test
   public void delete() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(2L);
     identification.setStrategy(e -> e.setId(1L));
     repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setProject(project));
+        .createModel(ColumnType.MONDAY));
 
-    service.delete(1L, 2L);
+    service.delete(1L);
 
     Assertions
         .assertThat(repository.find(1L))

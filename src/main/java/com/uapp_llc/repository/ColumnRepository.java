@@ -1,5 +1,6 @@
 package com.uapp_llc.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -11,9 +12,13 @@ public interface ColumnRepository {
 
   Column save(Column entity);
 
-  Optional<Column> findByIdAndProjectId(Long id, Long projectId);
+  Optional<Column> findById(Long id);
 
-  Page<Column> findAllByProjectId(Long projectId, Pageable pageable);
+  List<Column> findAll();
+
+  Page<Column> findAll(Pageable pageable);
+
+  int count();
 
   void delete(Column entity);
 

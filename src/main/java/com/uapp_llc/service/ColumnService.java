@@ -4,20 +4,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.uapp_llc.model.Column;
-import com.uapp_llc.model.Project;
 
 public interface ColumnService {
 
-  Column create(Project project, String name);
+  Column create(String name);
 
-  Column update(Long id, Long projectId, String name);
+  Column update(Long id, String name);
 
-  Column changeIndex(Long id, Long projectId, Integer index);
+  Column changeIndex(Long id, Integer index);
 
-  Column find(Long id, Long projectId);
+  Column find(Long id);
 
-  Page<Column> findAll(Long projectId, Pageable pageable);
+  Page<Column> findAll(Pageable pageable);
 
-  void delete(Long id, Long projectId);
+  void delete(Long id);
 
 }

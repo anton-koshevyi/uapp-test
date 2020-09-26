@@ -1,5 +1,6 @@
 package com.uapp_llc.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +27,23 @@ public class ColumnRepositoryImpl implements ColumnRepository {
   }
 
   @Override
-  public Optional<Column> findByIdAndProjectId(Long id, Long projectId) {
-    return delegate.findByIdAndProjectId(id, projectId);
+  public Optional<Column> findById(Long id) {
+    return delegate.findById(id);
   }
 
   @Override
-  public Page<Column> findAllByProjectId(Long projectId, Pageable pageable) {
-    return delegate.findAllByProjectId(projectId, pageable);
+  public List<Column> findAll() {
+    return delegate.findAll();
+  }
+
+  @Override
+  public Page<Column> findAll(Pageable pageable) {
+    return delegate.findAll(pageable);
+  }
+
+  @Override
+  public int count() {
+    return (int) delegate.count();
   }
 
   @Override

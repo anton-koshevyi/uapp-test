@@ -1,9 +1,7 @@
 package com.uapp_llc.test.stub.repository;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -32,19 +30,25 @@ public class ColumnRepositoryStub
   }
 
   @Override
-  public Optional<Column> findByIdAndProjectId(Long id, Long projectId) {
-    Column entity = super.find(column ->
-        Objects.equals(id, column.getId())
-            && Objects.equals(projectId, column.getProject().getId()));
+  public Optional<Column> findById(Long id) {
+    Column entity = super.find(id);
     return Optional.ofNullable(entity);
   }
 
   @Override
-  public Page<Column> findAllByProjectId(Long projectId, Pageable pageable) {
-    List<Column> entities = super.findAll().stream()
-        .filter(column -> Objects.equals(projectId, column.getProject().getId()))
-        .collect(Collectors.toList());
+  public List<Column> findAll() {
+    return super.findAll();
+  }
+
+  @Override
+  public Page<Column> findAll(Pageable pageable) {
+    List<Column> entities = super.findAll();
     return new PageImpl<>(entities);
+  }
+
+  @Override
+  public int count() {
+    return super.size();
   }
 
   @Override

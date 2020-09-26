@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.uapp_llc.exception.IllegalActionException;
 import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Column;
-import com.uapp_llc.model.Project;
 import com.uapp_llc.repository.ColumnRepository;
 
 @Service
@@ -26,18 +25,17 @@ public class ColumnServiceImpl implements ColumnService {
 
   @Transactional
   @Override
-  public Column create(Project project, String name) {
+  public Column create(String name) {
     Column entity = new Column();
     entity.setName(name);
-    entity.setIndex(project.getColumns().size());
-    entity.setProject(project);
+    entity.setIndex(repository.count());
     return repository.save(entity);
   }
 
   @Transactional
   @Override
-  public Column update(Long id, Long projectId, String name) {
-    Column entity = this.find(id, projectId);
+  public Column update(Long id, String name) {
+    Column entity = this.find(id);
 
     if (name != null) {
       entity.setName(name);
@@ -48,15 +46,15 @@ public class ColumnServiceImpl implements ColumnService {
 
   @Transactional
   @Override
-  public Column changeIndex(Long id, Long projectId, Integer index) {
-    Column entity = this.find(id, projectId);
+  public Column changeIndex(Long id, Integer index) {
+    Column entity = this.find(id);
     Integer actual = entity.getIndex();
 
     if (actual.equals(index)) {
       return entity;
     }
 
-    List<Column> columns = entity.getProject().getColumns();
+    List<Column> columns = repository.findAll();
 
     if (index < 0 || index >= columns.size()) {
       throw new IllegalActionException("New column index out of bounds: " + index);
@@ -81,21 +79,21 @@ public class ColumnServiceImpl implements ColumnService {
   }
 
   @Override
-  public Column find(Long id, Long projectId) {
-    return repository.findByIdAndProjectId(id, projectId)
+  public Column find(Long id) {
+    return repository.findById(id)
         .orElseThrow(() -> new NotFoundException(String.format(
-            "No column for id '%s' and project id '%s'", id, projectId)));
+            "No column for id '%s'", id)));
   }
 
   @Override
-  public Page<Column> findAll(Long projectId, Pageable pageable) {
-    return repository.findAllByProjectId(projectId, pageable);
+  public Page<Column> findAll(Pageable pageable) {
+    return repository.findAll(pageable);
   }
 
   @Transactional
   @Override
-  public void delete(Long id, Long projectId) {
-    Column entity = this.find(id, projectId);
+  public void delete(Long id) {
+    Column entity = this.find(id);
     repository.delete(entity);
   }
 

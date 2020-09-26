@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.uapp_llc.model.Column;
-import com.uapp_llc.model.Project;
 import com.uapp_llc.model.Task;
 
 public final class ComparatorFactory {
@@ -23,14 +22,8 @@ public final class ComparatorFactory {
     String typeName = type.getName();
 
     if (!typeComparators.containsKey(typeName)) {
-      if (Project.class.equals(type)) {
-        typeComparators.put(typeName, new ProjectComparator());
-      }
-
       if (Column.class.equals(type)) {
-        typeComparators.put(typeName, new ColumnComparator(
-            ComparatorFactory.getComparator(Project.class)
-        ));
+        typeComparators.put(typeName, new ColumnComparator());
       }
 
       if (Task.class.equals(type)) {

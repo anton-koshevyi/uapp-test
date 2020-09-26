@@ -11,12 +11,10 @@ import org.springframework.data.domain.Pageable;
 import com.uapp_llc.exception.IllegalActionException;
 import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Column;
-import com.uapp_llc.model.Project;
 import com.uapp_llc.model.Task;
 import com.uapp_llc.test.comparator.ComparatorFactory;
 import com.uapp_llc.test.model.ModelFactoryProducer;
 import com.uapp_llc.test.model.column.ColumnType;
-import com.uapp_llc.test.model.project.ProjectType;
 import com.uapp_llc.test.model.task.TaskType;
 import com.uapp_llc.test.stub.repository.TaskRepositoryStub;
 import com.uapp_llc.test.stub.repository.identification.IdentificationContext;
@@ -36,13 +34,9 @@ public class TaskServiceTest {
 
   @Test
   public void create() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     Column column = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setId(2L)
-        .setProject(project);
+        .setId(2L);
     identification.setStrategy(e -> e.setId(1L));
 
     service.create(
@@ -61,10 +55,7 @@ public class TaskServiceTest {
             .setIndex(0)
             .setColumn(ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.MONDAY)
-                .setId(2L)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(1L))));
+                .setId(2L)));
   }
 
   @Test
@@ -77,13 +68,9 @@ public class TaskServiceTest {
 
   @Test
   public void update() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     Column column = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setId(2L)
-        .setProject(project);
+        .setId(2L);
     identification.setStrategy(e -> e.setId(1L));
     repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
@@ -106,10 +93,7 @@ public class TaskServiceTest {
             .setDescription("Meet John")
             .setColumn(ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.MONDAY)
-                .setId(2L)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(1L))));
+                .setId(2L)));
   }
 
   @Test
@@ -123,24 +107,19 @@ public class TaskServiceTest {
   @ParameterizedTest
   @ValueSource(ints = {-1, 2})
   public void move_whenIndexOutOfBounds_expectException(int newIndex) {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     Column column = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setId(1L)
-        .setProject(project);
+        .setId(1L);
     identification.setStrategy(e -> e.setId(1L));
-    Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
+    repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
         .setIndex(0)
         .setColumn(column));
     identification.setStrategy(e -> e.setId(2L));
-    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
+    repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.MEETING)
         .setIndex(1)
         .setColumn(column));
-    column.setTasks(Lists.newArrayList(job, meeting));
 
     Assertions
         .assertThatThrownBy(() -> service.move(2L, 1L, null, newIndex))
@@ -150,24 +129,19 @@ public class TaskServiceTest {
 
   @Test
   public void move_whenNewIndexNotNull_andNewIndexEqualToActual_expectNoChanges() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     Column column = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setId(1L)
-        .setProject(project);
+        .setId(1L);
     identification.setStrategy(e -> e.setId(1L));
-    Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
+    repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
         .setIndex(0)
         .setColumn(column));
     identification.setStrategy(e -> e.setId(2L));
-    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
+    repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.MEETING)
         .setIndex(1)
         .setColumn(column));
-    column.setTasks(Lists.newArrayList(job, meeting));
 
     service.move(2L, 1L, null, 1);
 
@@ -181,32 +155,22 @@ public class TaskServiceTest {
                 .setIndex(0)
                 .setColumn(ModelFactoryProducer.getFactory(Column.class)
                     .createModel(ColumnType.MONDAY)
-                    .setId(1L)
-                    .setProject(ModelFactoryProducer.getFactory(Project.class)
-                        .createModel(ProjectType.DEFAULT)
-                        .setId(1L))),
+                    .setId(1L)),
             ModelFactoryProducer.getFactory(Task.class)
                 .createModel(TaskType.MEETING)
                 .setId(2L)
                 .setIndex(1)
                 .setColumn(ModelFactoryProducer.getFactory(Column.class)
                     .createModel(ColumnType.MONDAY)
-                    .setId(1L)
-                    .setProject(ModelFactoryProducer.getFactory(Project.class)
-                        .createModel(ProjectType.DEFAULT)
-                        .setId(1L)))
+                    .setId(1L))
         );
   }
 
   @Test
   public void move_whenNewIndexNotNull_andNewIndexAfterActual() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     Column column = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setId(1L)
-        .setProject(project);
+        .setId(1L);
     identification.setStrategy(e -> e.setId(1L));
     Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
@@ -231,32 +195,22 @@ public class TaskServiceTest {
                 .setIndex(1)
                 .setColumn(ModelFactoryProducer.getFactory(Column.class)
                     .createModel(ColumnType.MONDAY)
-                    .setId(1L)
-                    .setProject(ModelFactoryProducer.getFactory(Project.class)
-                        .createModel(ProjectType.DEFAULT)
-                        .setId(1L))),
+                    .setId(1L)),
             ModelFactoryProducer.getFactory(Task.class)
                 .createModel(TaskType.MEETING)
                 .setId(2L)
                 .setIndex(0)
                 .setColumn(ModelFactoryProducer.getFactory(Column.class)
                     .createModel(ColumnType.MONDAY)
-                    .setId(1L)
-                    .setProject(ModelFactoryProducer.getFactory(Project.class)
-                        .createModel(ProjectType.DEFAULT)
-                        .setId(1L)))
+                    .setId(1L))
         );
   }
 
   @Test
   public void move_whenNewIndexNotNull_andNewIndexBeforeActual() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     Column column = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setId(1L)
-        .setProject(project);
+        .setId(1L);
     identification.setStrategy(e -> e.setId(1L));
     Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
@@ -281,41 +235,29 @@ public class TaskServiceTest {
                 .setIndex(1)
                 .setColumn(ModelFactoryProducer.getFactory(Column.class)
                     .createModel(ColumnType.MONDAY)
-                    .setId(1L)
-                    .setProject(ModelFactoryProducer.getFactory(Project.class)
-                        .createModel(ProjectType.DEFAULT)
-                        .setId(1L))),
+                    .setId(1L)),
             ModelFactoryProducer.getFactory(Task.class)
                 .createModel(TaskType.MEETING)
                 .setId(2L)
                 .setIndex(0)
                 .setColumn(ModelFactoryProducer.getFactory(Column.class)
                     .createModel(ColumnType.MONDAY)
-                    .setId(1L)
-                    .setProject(ModelFactoryProducer.getFactory(Project.class)
-                        .createModel(ProjectType.DEFAULT)
-                        .setId(1L)))
+                    .setId(1L))
         );
   }
 
   @Test
   public void move_whenNewColumnNotNull() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     Column monday = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setId(1L)
-        .setProject(project);
+        .setId(1L);
     Column wednesday = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.WEDNESDAY)
-        .setId(2L)
-        .setProject(project);
+        .setId(2L);
     identification.setStrategy(e -> e.setId(1L));
-    Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
+    repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
         .setColumn(monday));
-    monday.setTasks(Lists.newArrayList(job));
 
     Assertions
         .assertThat(service.move(1L, 1L, wednesday, null))
@@ -325,10 +267,7 @@ public class TaskServiceTest {
             .setId(1L)
             .setColumn(ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.WEDNESDAY)
-                .setId(2L)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(1L))));
+                .setId(2L)));
   }
 
   @Test
@@ -341,13 +280,9 @@ public class TaskServiceTest {
 
   @Test
   public void find() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     Column column = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setId(2L)
-        .setProject(project);
+        .setId(2L);
     identification.setStrategy(e -> e.setId(1L));
     repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
@@ -361,21 +296,14 @@ public class TaskServiceTest {
             .setId(1L)
             .setColumn(ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.MONDAY)
-                .setId(2L)
-                .setProject(ModelFactoryProducer.getFactory(Project.class)
-                    .createModel(ProjectType.DEFAULT)
-                    .setId(1L))));
+                .setId(2L)));
   }
 
   @Test
   public void findAll() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     Column column = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setId(2L)
-        .setProject(project);
+        .setId(2L);
     identification.setStrategy(e -> e.setId(1L));
     repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
@@ -394,19 +322,13 @@ public class TaskServiceTest {
                 .setId(1L)
                 .setColumn(ModelFactoryProducer.getFactory(Column.class)
                     .createModel(ColumnType.MONDAY)
-                    .setId(2L)
-                    .setProject(ModelFactoryProducer.getFactory(Project.class)
-                        .createModel(ProjectType.DEFAULT)
-                        .setId(1L))),
+                    .setId(2L)),
             ModelFactoryProducer.getFactory(Task.class)
                 .createModel(TaskType.MEETING)
                 .setId(2L)
                 .setColumn(ModelFactoryProducer.getFactory(Column.class)
                     .createModel(ColumnType.MONDAY)
-                    .setId(2L)
-                    .setProject(ModelFactoryProducer.getFactory(Project.class)
-                        .createModel(ProjectType.DEFAULT)
-                        .setId(1L)))
+                    .setId(2L))
         );
   }
 
@@ -420,13 +342,9 @@ public class TaskServiceTest {
 
   @Test
   public void delete() {
-    Project project = ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT)
-        .setId(1L);
     Column column = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
-        .setId(2L)
-        .setProject(project);
+        .setId(2L);
     identification.setStrategy(e -> e.setId(1L));
     repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)

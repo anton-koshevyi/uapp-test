@@ -7,8 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -36,9 +34,5 @@ public class Column {
   @OneToMany(mappedBy = "column", cascade = CascadeType.REMOVE)
   @OrderBy("index")
   private List<Task> tasks = new ArrayList<>();
-
-  @ManyToOne(cascade = CascadeType.MERGE)
-  @JoinColumn(name = "project_id")
-  private Project project;
 
 }

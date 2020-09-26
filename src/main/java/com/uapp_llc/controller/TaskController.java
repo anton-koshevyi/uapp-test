@@ -34,18 +34,17 @@ public class TaskController {
     this.taskService = taskService;
   }
 
-  @GetMapping("/projects/{projectId}/columns/{columnId}/tasks")
+  @GetMapping("/columns/{columnId}/tasks")
   public Page<TaskDto> getAll(@PathVariable Long columnId,
                               @PageableDefault(sort = "index") Pageable pageable) {
     Page<Task> tasks = taskService.findAll(columnId, pageable);
     return tasks.map(TaskMapper.INSTANCE::toDto);
   }
 
-  @PostMapping("/projects/{projectId}/columns/{columnId}/tasks")
-  public TaskDto create(@PathVariable Long projectId,
-                        @PathVariable Long columnId,
+  @PostMapping("/columns/{columnId}/tasks")
+  public TaskDto create(@PathVariable Long columnId,
                         @RequestBody ContentDto dto) {
-    Column column = columnService.find(projectId, columnId);
+    Column column = columnService.find(columnId);
     Task task = taskService.create(
         column,
         dto.getName(),
@@ -54,14 +53,14 @@ public class TaskController {
     return TaskMapper.INSTANCE.toDto(task);
   }
 
-  @GetMapping("/projects/{projectId}/columns/{columnId}/tasks/{id}")
+  @GetMapping("/columns/{columnId}/tasks/{id}")
   public TaskDto get(@PathVariable Long columnId,
                      @PathVariable Long id) {
     Task task = taskService.find(id, columnId);
     return TaskMapper.INSTANCE.toDto(task);
   }
 
-  @PatchMapping("/projects/{projectId}/columns/{columnId}/tasks/{id}")
+  @PatchMapping("/columns/{columnId}/tasks/{id}")
   public TaskDto update(@PathVariable Long columnId,
                         @PathVariable Long id,
                         @RequestBody ContentDto dto) {
@@ -74,14 +73,13 @@ public class TaskController {
     return TaskMapper.INSTANCE.toDto(task);
   }
 
-  @PutMapping("/projects/{projectId}/columns/{columnId}/tasks/{id}")
-  public TaskDto move(@PathVariable Long projectId,
-                      @PathVariable Long columnId,
+  @PutMapping("/columns/{columnId}/tasks/{id}")
+  public TaskDto move(@PathVariable Long columnId,
                       @PathVariable Long id,
                       @RequestBody MoveDto dto) {
     Long newColumnId = dto.getNewColumnId();
     Column newColumn = (newColumnId != null)
-        ? columnService.find(newColumnId, projectId)
+        ? columnService.find(newColumnId)
         : null;
     Task task = taskService.move(
         id,
@@ -92,7 +90,7 @@ public class TaskController {
     return TaskMapper.INSTANCE.toDto(task);
   }
 
-  @DeleteMapping("/projects/{projectId}/columns/{columnId}/tasks/{id}")
+  @DeleteMapping("/columns/{columnId}/tasks/{id}")
   public void delete(@PathVariable Long columnId,
                      @PathVariable Long id) {
     taskService.delete(id, columnId);

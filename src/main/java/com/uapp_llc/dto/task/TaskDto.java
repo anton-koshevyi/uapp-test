@@ -15,6 +15,7 @@ public class TaskDto {
   private Date createdAt;
   private String name;
   private String description;
+  private Integer index;
   private ColumnDto column;
 
 }

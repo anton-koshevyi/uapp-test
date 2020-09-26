@@ -33,6 +33,9 @@ public class Task {
   @javax.persistence.Column(name = "description")
   private String description;
 
+  @javax.persistence.Column(name = "index", nullable = false)
+  private Integer index;
+
   @ManyToOne(cascade = CascadeType.MERGE)
   @JoinColumn(name = "column_id")
   private Column column;

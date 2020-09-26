@@ -9,6 +9,7 @@ public class ColumnDto {
 
   private Long id;
   private String name;
+  private Integer index;
   private Long projectId;
 
 }

@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import lombok.Getter;
@@ -29,7 +30,11 @@ public class Column {
   @javax.persistence.Column(name = "name")
   private String name;
 
+  @javax.persistence.Column(name = "index", nullable = false)
+  private Integer index;
+
   @OneToMany(mappedBy = "column", cascade = CascadeType.REMOVE)
+  @OrderBy("index")
   private List<Task> tasks = new ArrayList<>();
 
   @ManyToOne(cascade = CascadeType.MERGE)

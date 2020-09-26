@@ -11,6 +11,7 @@ class Job extends Task {
     super.setCreatedAt(ZonedDateTime.now());
     super.setName("Job");
     super.setDescription("Go to job");
+    super.setIndex(0);
     super.setColumn(new Column());
   }
 

@@ -11,6 +11,7 @@ class Meeting extends Task {
     super.setCreatedAt(ZonedDateTime.now());
     super.setName("Meeting");
     super.setDescription("Meet John");
+    super.setIndex(1);
     super.setColumn(new Column());
   }
 

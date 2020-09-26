@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.util.Lists;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +16,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
@@ -106,26 +104,6 @@ public class ColumnControllerTest {
   }
 
   @Test
-  public void create_whenInvalidBody_expectException() {
-    projectIdentification.setStrategy(e -> e.setId(1L));
-    projectRepository.save(ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT));
-    columnIdentification.setStrategy(e -> e.setId(1L));
-
-    RestAssuredMockMvc
-        .given()
-        .header("Content-Type", "application/json")
-        .body("{}")
-        .when()
-        .post("/projects/{projectId}/columns", 1)
-        .then()
-        .statusCode(HttpServletResponse.SC_BAD_REQUEST)
-        .expect(result -> Assertions
-            .assertThat(result.getResolvedException())
-            .isExactlyInstanceOf(MethodArgumentNotValidException.class));
-  }
-
-  @Test
   public void create() throws JSONException {
     projectIdentification.setStrategy(e -> e.setId(1L));
     projectRepository.save(ModelFactoryProducer.getFactory(Project.class)
@@ -147,6 +125,7 @@ public class ColumnControllerTest {
     String expected = "{"
         + "id: 1,"
         + "name: 'Monday tasks',"
+        + "index: 0,"
         + "projectId: 1"
         + "}";
     JSONAssert
@@ -176,33 +155,11 @@ public class ColumnControllerTest {
     String expected = "{"
         + "id: 1,"
         + "name: 'Monday tasks',"
+        + "index: 0,"
         + "projectId: 1"
         + "}";
     JSONAssert
         .assertEquals(expected, actual, JSONCompareMode.NON_EXTENSIBLE);
-  }
-
-  @Test
-  public void update_whenInvalidBody_expectException() {
-    projectIdentification.setStrategy(e -> e.setId(1L));
-    Project project = projectRepository.save(ModelFactoryProducer.getFactory(Project.class)
-        .createModel(ProjectType.DEFAULT));
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setProject(project));
-
-    RestAssuredMockMvc
-        .given()
-        .header("Content-Type", "application/json")
-        .body("{ \"name\": \"\" }")
-        .when()
-        .patch("/projects/{projectId}/columns/{id}", 1, 1)
-        .then()
-        .statusCode(HttpServletResponse.SC_BAD_REQUEST)
-        .expect(result -> Assertions
-            .assertThat(result.getResolvedException())
-            .isExactlyInstanceOf(MethodArgumentNotValidException.class));
   }
 
   @Test
@@ -230,6 +187,7 @@ public class ColumnControllerTest {
     String expected = "{"
         + "id: 1,"
         + "name: 'Tuesday tasks',"
+        + "index: 0,"
         + "projectId: 1"
         + "}";
     JSONAssert
@@ -244,10 +202,12 @@ public class ColumnControllerTest {
     columnIdentification.setStrategy(e -> e.setId(1L));
     Column monday = columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
+        .setIndex(0)
         .setProject(project));
     columnIdentification.setStrategy(e -> e.setId(2L));
     Column wednesday = columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.WEDNESDAY)
+        .setIndex(1)
         .setProject(project));
     project.setColumns(Lists.newArrayList(monday, wednesday));
 
@@ -262,19 +222,20 @@ public class ColumnControllerTest {
         .statusCode(HttpServletResponse.SC_OK);
 
     Assertions
-        .assertThat(projectRepository.find(1L))
-        .extracting(Project::getColumns, InstanceOfAssertFactories.LIST)
+        .assertThat(columnRepository.findAll())
         .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
-        .containsExactly(
+        .containsExactlyInAnyOrder(
             ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.WEDNESDAY)
-                .setId(2L)
+                .createModel(ColumnType.MONDAY)
+                .setId(1L)
+                .setIndex(1)
                 .setProject(ModelFactoryProducer.getFactory(Project.class)
                     .createModel(ProjectType.DEFAULT)
                     .setId(1L)),
             ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.MONDAY)
-                .setId(1L)
+                .createModel(ColumnType.WEDNESDAY)
+                .setId(2L)
+                .setIndex(0)
                 .setProject(ModelFactoryProducer.getFactory(Project.class)
                     .createModel(ProjectType.DEFAULT)
                     .setId(1L))

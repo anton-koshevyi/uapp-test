@@ -22,6 +22,7 @@ class TaskComparator implements Comparator<Task> {
         .compare(left.getCreatedAt(), right.getCreatedAt(), NotNullComparator.leftNotNull())
         .compare(left.getName(), right.getName())
         .compare(left.getDescription(), right.getDescription())
+        .compare(left.getIndex(), right.getIndex())
         .compare(left.getColumn(), right.getColumn(), columnComparator)
         .result();
   }

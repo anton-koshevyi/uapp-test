@@ -4,6 +4,8 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.data.domain.Pageable;
 
 import com.uapp_llc.exception.IllegalActionException;
@@ -48,6 +50,7 @@ public class ColumnServiceTest {
         .isEqualTo(new Column()
             .setId(1L)
             .setName("Monday tasks")
+            .setIndex(0)
             .setProject(ModelFactoryProducer.getFactory(Project.class)
                 .createModel(ProjectType.DEFAULT)
                 .setId(2L)));
@@ -100,8 +103,9 @@ public class ColumnServiceTest {
         .hasFieldOrPropertyWithValue("getArguments", new Object[]{2L, 1L});
   }
 
-  @Test
-  public void changeIndex_whenIndexOutOfBounds_expectException() {
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 2})
+  public void changeIndex_whenIndexOutOfBounds_expectException(int newIndex) {
     Project project = ModelFactoryProducer.getFactory(Project.class)
         .createModel(ProjectType.DEFAULT)
         .setId(1L);
@@ -116,43 +120,127 @@ public class ColumnServiceTest {
     project.setColumns(Lists.newArrayList(monday, wednesday));
 
     Assertions
-        .assertThatThrownBy(() -> service.changeIndex(2L, 1L, -1))
+        .assertThatThrownBy(() -> service.changeIndex(2L, 1L, newIndex))
         .isExactlyInstanceOf(IllegalActionException.class)
         .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"illegalAction.column.indexOutOfBounds"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{-1});
+            new Object[]{"illegalAction.column.changeIndexOutOfBounds"})
+        .hasFieldOrPropertyWithValue("getArguments", new Object[]{newIndex});
   }
 
   @Test
-  public void changeIndex() {
+  public void changeIndex_whenIndexEqualToActual_expectNoChanges() {
     Project project = ModelFactoryProducer.getFactory(Project.class)
         .createModel(ProjectType.DEFAULT)
         .setId(1L);
     identification.setStrategy(e -> e.setId(1L));
     Column monday = repository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
+        .setIndex(0)
         .setProject(project));
     identification.setStrategy(e -> e.setId(2L));
     Column wednesday = repository.save(ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.WEDNESDAY)
+        .setIndex(1)
+        .setProject(project));
+    project.setColumns(Lists.newArrayList(monday, wednesday));
+
+    service.changeIndex(1L, 1L, 0);
+
+    Assertions
+        .assertThat(repository.findAll())
+        .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
+        .containsExactlyInAnyOrder(
+            ModelFactoryProducer.getFactory(Column.class)
+                .createModel(ColumnType.MONDAY)
+                .setId(1L)
+                .setIndex(0)
+                .setProject(ModelFactoryProducer.getFactory(Project.class)
+                    .createModel(ProjectType.DEFAULT)
+                    .setId(1L)),
+            ModelFactoryProducer.getFactory(Column.class)
+                .createModel(ColumnType.WEDNESDAY)
+                .setId(2L)
+                .setIndex(1)
+                .setProject(ModelFactoryProducer.getFactory(Project.class)
+                    .createModel(ProjectType.DEFAULT)
+                    .setId(1L))
+        );
+  }
+
+  @Test
+  public void changeIndex_whenIndexAfterActual() {
+    Project project = ModelFactoryProducer.getFactory(Project.class)
+        .createModel(ProjectType.DEFAULT)
+        .setId(1L);
+    identification.setStrategy(e -> e.setId(1L));
+    Column monday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.MONDAY)
+        .setIndex(0)
+        .setProject(project));
+    identification.setStrategy(e -> e.setId(2L));
+    Column wednesday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.WEDNESDAY)
+        .setIndex(1)
         .setProject(project));
     project.setColumns(Lists.newArrayList(monday, wednesday));
 
     service.changeIndex(2L, 1L, 0);
 
     Assertions
-        .assertThat(project.getColumns())
+        .assertThat(repository.findAll())
         .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
-        .containsExactly(
+        .containsExactlyInAnyOrder(
             ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.WEDNESDAY)
-                .setId(2L)
+                .createModel(ColumnType.MONDAY)
+                .setId(1L)
+                .setIndex(1)
                 .setProject(ModelFactoryProducer.getFactory(Project.class)
                     .createModel(ProjectType.DEFAULT)
                     .setId(1L)),
             ModelFactoryProducer.getFactory(Column.class)
+                .createModel(ColumnType.WEDNESDAY)
+                .setId(2L)
+                .setIndex(0)
+                .setProject(ModelFactoryProducer.getFactory(Project.class)
+                    .createModel(ProjectType.DEFAULT)
+                    .setId(1L))
+        );
+  }
+
+  @Test
+  public void changeIndex_whenIndexBeforeActual() {
+    Project project = ModelFactoryProducer.getFactory(Project.class)
+        .createModel(ProjectType.DEFAULT)
+        .setId(1L);
+    identification.setStrategy(e -> e.setId(1L));
+    Column monday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.MONDAY)
+        .setIndex(0)
+        .setProject(project));
+    identification.setStrategy(e -> e.setId(2L));
+    Column wednesday = repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.WEDNESDAY)
+        .setIndex(1)
+        .setProject(project));
+    project.setColumns(Lists.newArrayList(monday, wednesday));
+
+    service.changeIndex(1L, 1L, 1);
+
+    Assertions
+        .assertThat(repository.findAll())
+        .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
+        .containsExactlyInAnyOrder(
+            ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.MONDAY)
                 .setId(1L)
+                .setIndex(1)
+                .setProject(ModelFactoryProducer.getFactory(Project.class)
+                    .createModel(ProjectType.DEFAULT)
+                    .setId(1L)),
+            ModelFactoryProducer.getFactory(Column.class)
+                .createModel(ColumnType.WEDNESDAY)
+                .setId(2L)
+                .setIndex(0)
                 .setProject(ModelFactoryProducer.getFactory(Project.class)
                     .createModel(ProjectType.DEFAULT)
                     .setId(1L))

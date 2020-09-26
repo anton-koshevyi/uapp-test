@@ -20,6 +20,7 @@ class ColumnComparator implements Comparator<Column> {
     return ComparisonChain.start()
         .compare(left.getId(), right.getId())
         .compare(left.getName(), right.getName())
+        .compare(left.getIndex(), right.getIndex())
         .compare(left.getProject(), right.getProject(), projectComparator)
         .result();
   }

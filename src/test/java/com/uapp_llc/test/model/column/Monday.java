@@ -7,6 +7,7 @@ class Monday extends Column {
 
   Monday() {
     super.setName("Monday tasks");
+    super.setIndex(0);
     super.setProject(new Project());
   }
 

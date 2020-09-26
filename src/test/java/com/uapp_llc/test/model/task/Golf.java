@@ -10,7 +10,8 @@ class Golf extends Task {
   Golf() {
     super.setCreatedAt(ZonedDateTime.now());
     super.setName("Golf");
-    super.setDescription("Plat golf");
+    super.setDescription("Play golf");
+    super.setIndex(2);
     super.setColumn(new Column());
   }
 

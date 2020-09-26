@@ -4,6 +4,8 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.data.domain.Pageable;
 
 import com.uapp_llc.exception.IllegalActionException;
@@ -56,6 +58,7 @@ public class TaskServiceTest {
             .setId(1L)
             .setName("Job")
             .setDescription("Go to job")
+            .setIndex(0)
             .setColumn(ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.MONDAY)
                 .setId(2L)
@@ -114,15 +117,16 @@ public class TaskServiceTest {
   @Test
   public void move_whenNotEntityWithIdAndColumnId_expectException() {
     Assertions
-        .assertThatThrownBy(() -> service.move(1L, 2L, null, 0))
+        .assertThatThrownBy(() -> service.move(2L, 1L, null, 0))
         .isExactlyInstanceOf(NotFoundException.class)
         .hasFieldOrPropertyWithValue("getCodes",
             new Object[]{"notFound.task.byIdAndColumnId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{1L, 2L});
+        .hasFieldOrPropertyWithValue("getArguments", new Object[]{2L, 1L});
   }
 
-  @Test
-  public void move_whenIndexOutOfBounds_expectException() {
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 2})
+  public void move_whenIndexOutOfBounds_expectException(int newIndex) {
     Project project = ModelFactoryProducer.getFactory(Project.class)
         .createModel(ProjectType.DEFAULT)
         .setId(1L);
@@ -133,23 +137,25 @@ public class TaskServiceTest {
     identification.setStrategy(e -> e.setId(1L));
     Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
+        .setIndex(0)
         .setColumn(column));
     identification.setStrategy(e -> e.setId(2L));
     Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.MEETING)
+        .setIndex(1)
         .setColumn(column));
     column.setTasks(Lists.newArrayList(job, meeting));
 
     Assertions
-        .assertThatThrownBy(() -> service.move(2L, 1L, null, -1))
+        .assertThatThrownBy(() -> service.move(2L, 1L, null, newIndex))
         .isExactlyInstanceOf(IllegalActionException.class)
         .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"illegalAction.task.indexOutOfBounds"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{-1});
+            new Object[]{"illegalAction.task.moveIndexOutOfBounds"})
+        .hasFieldOrPropertyWithValue("getArguments", new Object[]{newIndex});
   }
 
   @Test
-  public void move_whenNewIndexNotNull() {
+  public void move_whenNewIndexNotNull_andNewIndexEqualToActual_expectNoChanges() {
     Project project = ModelFactoryProducer.getFactory(Project.class)
         .createModel(ProjectType.DEFAULT)
         .setId(1L);
@@ -160,22 +166,25 @@ public class TaskServiceTest {
     identification.setStrategy(e -> e.setId(1L));
     Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
+        .setIndex(0)
         .setColumn(column));
     identification.setStrategy(e -> e.setId(2L));
     Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.MEETING)
+        .setIndex(1)
         .setColumn(column));
     column.setTasks(Lists.newArrayList(job, meeting));
 
-    service.move(2L, 1L, null, 0);
+    service.move(2L, 1L, null, 1);
 
     Assertions
-        .assertThat(column.getTasks())
+        .assertThat(repository.findAll())
         .usingComparatorForType(ComparatorFactory.getComparator(Task.class), Task.class)
-        .containsExactly(
+        .containsExactlyInAnyOrder(
             ModelFactoryProducer.getFactory(Task.class)
-                .createModel(TaskType.MEETING)
-                .setId(2L)
+                .createModel(TaskType.JOB)
+                .setId(1L)
+                .setIndex(0)
                 .setColumn(ModelFactoryProducer.getFactory(Column.class)
                     .createModel(ColumnType.MONDAY)
                     .setId(1L)
@@ -183,8 +192,109 @@ public class TaskServiceTest {
                         .createModel(ProjectType.DEFAULT)
                         .setId(1L))),
             ModelFactoryProducer.getFactory(Task.class)
+                .createModel(TaskType.MEETING)
+                .setId(2L)
+                .setIndex(1)
+                .setColumn(ModelFactoryProducer.getFactory(Column.class)
+                    .createModel(ColumnType.MONDAY)
+                    .setId(1L)
+                    .setProject(ModelFactoryProducer.getFactory(Project.class)
+                        .createModel(ProjectType.DEFAULT)
+                        .setId(1L)))
+        );
+  }
+
+  @Test
+  public void move_whenNewIndexNotNull_andNewIndexAfterActual() {
+    Project project = ModelFactoryProducer.getFactory(Project.class)
+        .createModel(ProjectType.DEFAULT)
+        .setId(1L);
+    Column column = ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.MONDAY)
+        .setId(1L)
+        .setProject(project);
+    identification.setStrategy(e -> e.setId(1L));
+    Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
+        .createModel(TaskType.JOB)
+        .setIndex(0)
+        .setColumn(column));
+    identification.setStrategy(e -> e.setId(2L));
+    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
+        .createModel(TaskType.MEETING)
+        .setIndex(1)
+        .setColumn(column));
+    column.setTasks(Lists.newArrayList(job, meeting));
+
+    service.move(1L, 1L, null, 1);
+
+    Assertions
+        .assertThat(repository.findAll())
+        .usingComparatorForType(ComparatorFactory.getComparator(Task.class), Task.class)
+        .containsExactlyInAnyOrder(
+            ModelFactoryProducer.getFactory(Task.class)
                 .createModel(TaskType.JOB)
                 .setId(1L)
+                .setIndex(1)
+                .setColumn(ModelFactoryProducer.getFactory(Column.class)
+                    .createModel(ColumnType.MONDAY)
+                    .setId(1L)
+                    .setProject(ModelFactoryProducer.getFactory(Project.class)
+                        .createModel(ProjectType.DEFAULT)
+                        .setId(1L))),
+            ModelFactoryProducer.getFactory(Task.class)
+                .createModel(TaskType.MEETING)
+                .setId(2L)
+                .setIndex(0)
+                .setColumn(ModelFactoryProducer.getFactory(Column.class)
+                    .createModel(ColumnType.MONDAY)
+                    .setId(1L)
+                    .setProject(ModelFactoryProducer.getFactory(Project.class)
+                        .createModel(ProjectType.DEFAULT)
+                        .setId(1L)))
+        );
+  }
+
+  @Test
+  public void move_whenNewIndexNotNull_andNewIndexBeforeActual() {
+    Project project = ModelFactoryProducer.getFactory(Project.class)
+        .createModel(ProjectType.DEFAULT)
+        .setId(1L);
+    Column column = ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.MONDAY)
+        .setId(1L)
+        .setProject(project);
+    identification.setStrategy(e -> e.setId(1L));
+    Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
+        .createModel(TaskType.JOB)
+        .setIndex(0)
+        .setColumn(column));
+    identification.setStrategy(e -> e.setId(2L));
+    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
+        .createModel(TaskType.MEETING)
+        .setIndex(1)
+        .setColumn(column));
+    column.setTasks(Lists.newArrayList(job, meeting));
+
+    service.move(2L, 1L, null, 0);
+
+    Assertions
+        .assertThat(repository.findAll())
+        .usingComparatorForType(ComparatorFactory.getComparator(Task.class), Task.class)
+        .containsExactlyInAnyOrder(
+            ModelFactoryProducer.getFactory(Task.class)
+                .createModel(TaskType.JOB)
+                .setId(1L)
+                .setIndex(1)
+                .setColumn(ModelFactoryProducer.getFactory(Column.class)
+                    .createModel(ColumnType.MONDAY)
+                    .setId(1L)
+                    .setProject(ModelFactoryProducer.getFactory(Project.class)
+                        .createModel(ProjectType.DEFAULT)
+                        .setId(1L))),
+            ModelFactoryProducer.getFactory(Task.class)
+                .createModel(TaskType.MEETING)
+                .setId(2L)
+                .setIndex(0)
                 .setColumn(ModelFactoryProducer.getFactory(Column.class)
                     .createModel(ColumnType.MONDAY)
                     .setId(1L)

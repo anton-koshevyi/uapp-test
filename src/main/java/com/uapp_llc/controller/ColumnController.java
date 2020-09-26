@@ -3,6 +3,7 @@ package com.uapp_llc.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +39,7 @@ public class ColumnController {
 
   @GetMapping("/projects/{projectId}/columns")
   public Page<ColumnDto> getAll(@PathVariable Long projectId,
-                                Pageable pageable) {
+                                @PageableDefault(sort = "index") Pageable pageable) {
     Page<Column> columns = columnService.findAll(projectId, pageable);
     return columns.map(ColumnMapper.INSTANCE::toDto);
   }

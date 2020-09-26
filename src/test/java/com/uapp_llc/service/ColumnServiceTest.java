@@ -61,9 +61,7 @@ public class ColumnServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.update(1L, 2L, "Tuesday tasks"))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"notFound.column.byIdAndProjectId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{1L, 2L});
+        .hasMessage("No column for id '1' and project id '2'");
   }
 
   @Test
@@ -98,9 +96,7 @@ public class ColumnServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.changeIndex(2L, 1L, 0))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"notFound.column.byIdAndProjectId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{2L, 1L});
+        .hasMessage("No column for id '2' and project id '1'");
   }
 
   @ParameterizedTest
@@ -122,9 +118,7 @@ public class ColumnServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.changeIndex(2L, 1L, newIndex))
         .isExactlyInstanceOf(IllegalActionException.class)
-        .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"illegalAction.column.changeIndexOutOfBounds"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{newIndex});
+        .hasMessage("New column index out of bounds: " + newIndex);
   }
 
   @Test
@@ -252,9 +246,7 @@ public class ColumnServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.find(1L, 2L))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"notFound.column.byIdAndProjectId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{1L, 2L});
+        .hasMessage("No column for id '1' and project id '2'");
   }
 
   @Test
@@ -315,9 +307,7 @@ public class ColumnServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.delete(1L, 2L))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"notFound.column.byIdAndProjectId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{1L, 2L});
+        .hasMessage("No column for id '1' and project id '2'");
   }
 
   @Test

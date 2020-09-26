@@ -43,8 +43,7 @@ public class ProjectServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.find(1L))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasFieldOrPropertyWithValue("getCodes", new Object[]{"notFound.project.byId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{1L});
+        .hasMessage("No project for id '1'");
   }
 
   @Test
@@ -66,8 +65,7 @@ public class ProjectServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.delete(1L))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasFieldOrPropertyWithValue("getCodes", new Object[]{"notFound.project.byId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{1L});
+        .hasMessage("No project for id '1'");
   }
 
   @Test

@@ -28,7 +28,8 @@ public class ProjectServiceImpl implements ProjectService {
   @Override
   public Project find(Long id) {
     return repository.findById(id)
-        .orElseThrow(() -> new NotFoundException("notFound.project.byId", id));
+        .orElseThrow(() -> new NotFoundException(String.format(
+            "No project for id '%s'", id)));
   }
 
   @Transactional

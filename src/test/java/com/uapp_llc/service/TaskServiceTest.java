@@ -72,9 +72,7 @@ public class TaskServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.update(1L, 2L, "Meeting", "Meet John"))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"notFound.task.byIdAndColumnId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{1L, 2L});
+        .hasMessage("No task for id '1' and column id '2'");
   }
 
   @Test
@@ -119,9 +117,7 @@ public class TaskServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.move(2L, 1L, null, 0))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"notFound.task.byIdAndColumnId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{2L, 1L});
+        .hasMessage("No task for id '2' and column id '1'");
   }
 
   @ParameterizedTest
@@ -149,9 +145,7 @@ public class TaskServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.move(2L, 1L, null, newIndex))
         .isExactlyInstanceOf(IllegalActionException.class)
-        .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"illegalAction.task.moveIndexOutOfBounds"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{newIndex});
+        .hasMessage("New task index out of bounds: " + newIndex);
   }
 
   @Test
@@ -342,9 +336,7 @@ public class TaskServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.find(1L, 2L))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"notFound.task.byIdAndColumnId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{1L, 2L});
+        .hasMessage("No task for id '1' and column id '2'");
   }
 
   @Test
@@ -423,9 +415,7 @@ public class TaskServiceTest {
     Assertions
         .assertThatThrownBy(() -> service.delete(1L, 2L))
         .isExactlyInstanceOf(NotFoundException.class)
-        .hasFieldOrPropertyWithValue("getCodes",
-            new Object[]{"notFound.task.byIdAndColumnId"})
-        .hasFieldOrPropertyWithValue("getArguments", new Object[]{1L, 2L});
+        .hasMessage("No task for id '1' and column id '2'");
   }
 
   @Test

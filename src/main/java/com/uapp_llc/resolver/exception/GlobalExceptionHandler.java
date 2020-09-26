@@ -4,8 +4,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
@@ -15,16 +13,12 @@ import com.uapp_llc.exception.LocalizedException;
 @Component
 public class GlobalExceptionHandler extends DefaultHandlerExceptionResolver {
 
-  private final MessageSource messageSource;
-
   /**
    * Must be ordered lower than HandlerExceptionResolver, implemented by
    * {@link org.springframework.boot.web.servlet.error.DefaultErrorAttributes},
    * otherwise {@code javax.servlet.error.exception} can be read incorrectly.
    */
-  @Autowired
-  public GlobalExceptionHandler(MessageSource messageSource) {
-    this.messageSource = messageSource;
+  public GlobalExceptionHandler() {
     super.setOrder(HIGHEST_PRECEDENCE + 1);
   }
 
@@ -40,7 +34,7 @@ public class GlobalExceptionHandler extends DefaultHandlerExceptionResolver {
 
     try {
       if (ex instanceof LocalizedException) {
-        return handleLocalized((LocalizedException) ex, request, response);
+        return handleLocalized((LocalizedException) ex, response);
       }
 
       super.sendServerError(ex, request, response);
@@ -54,11 +48,8 @@ public class GlobalExceptionHandler extends DefaultHandlerExceptionResolver {
   }
 
   private ModelAndView handleLocalized(
-      LocalizedException ex, HttpServletRequest request, HttpServletResponse response)
-      throws IOException {
-
-    String message = messageSource.getMessage(ex, request.getLocale());
-    response.sendError(ex.getStatusCode(), message);
+      LocalizedException ex, HttpServletResponse response) throws IOException {
+    response.sendError(ex.getStatusCode(), ex.getMessage());
     return new ModelAndView();
   }
 

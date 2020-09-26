@@ -70,8 +70,8 @@ public class TaskServiceImpl implements TaskService {
   @Override
   public Task find(Long id, Long columnId) {
     return repository.findByIdAndColumnId(id, columnId)
-        .orElseThrow(() -> new NotFoundException(
-            "notFound.task.byIdAndColumnId", id, columnId));
+        .orElseThrow(() -> new NotFoundException(String.format(
+            "No task for id '%s' and column id '%s'", id, columnId)));
   }
 
   @Override
@@ -96,8 +96,7 @@ public class TaskServiceImpl implements TaskService {
     List<Task> tasks = entity.getColumn().getTasks();
 
     if (index < 0 || index >= tasks.size()) {
-      throw new IllegalActionException(
-          "illegalAction.task.moveIndexOutOfBounds", index);
+      throw new IllegalActionException("New task index out of bounds: " + index);
     }
 
     if (actual > index) {

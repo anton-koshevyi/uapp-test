@@ -28,17 +28,12 @@ dependencies {
   implementation("com.h2database:h2:1.4.197")
   implementation("com.zaxxer:HikariCP:3.4.1")
   implementation("org.hibernate:hibernate-core:5.4.10.Final")
-  implementation("org.postgresql:postgresql:42.2.5")
   implementation("org.springframework.data:spring-data-jpa:2.2.0.RELEASE")
 
   // Logging
   implementation("ch.qos.logback:logback-classic:1.2.3")
   implementation("org.slf4j:jul-to-slf4j:1.7.30")
   implementation("org.slf4j:slf4j-api:1.7.30")
-
-  // Validation
-  implementation("org.glassfish:javax.el:3.0.0")
-  implementation("org.hibernate.validator:hibernate-validator:6.1.5.Final")
 
   // Web
   implementation("com.fasterxml.jackson.core:jackson-databind:2.11.0")
@@ -53,10 +48,6 @@ dependencies {
 
   // Test: CDI
   testImplementation("org.springframework:spring-test:5.2.0.RELEASE")
-
-  // Test: Mocking
-  testImplementation("org.mockito:mockito-inline:3.4.0")
-  testImplementation("org.mockito:mockito-junit-jupiter:3.4.0")
 
   // Test: Web
   testImplementation("io.rest-assured:rest-assured:4.3.0")

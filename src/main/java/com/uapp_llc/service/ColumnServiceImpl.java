@@ -59,8 +59,7 @@ public class ColumnServiceImpl implements ColumnService {
     List<Column> columns = entity.getProject().getColumns();
 
     if (index < 0 || index >= columns.size()) {
-      throw new IllegalActionException(
-          "illegalAction.column.changeIndexOutOfBounds", index);
+      throw new IllegalActionException("New column index out of bounds: " + index);
     }
 
     if (actual > index) {
@@ -84,8 +83,8 @@ public class ColumnServiceImpl implements ColumnService {
   @Override
   public Column find(Long id, Long projectId) {
     return repository.findByIdAndProjectId(id, projectId)
-        .orElseThrow(() -> new NotFoundException(
-            "notFound.column.byIdAndProjectId", id, projectId));
+        .orElseThrow(() -> new NotFoundException(String.format(
+            "No column for id '%s' and project id '%s'", id, projectId)));
   }
 
   @Override

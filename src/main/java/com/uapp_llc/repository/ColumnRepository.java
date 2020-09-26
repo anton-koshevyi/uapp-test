@@ -14,9 +14,9 @@ public interface ColumnRepository {
 
   Optional<Column> findById(Long id);
 
-  List<Column> findAll();
-
   Page<Column> findAll(Pageable pageable);
+
+  List<Column> findAllByOrderByIndex();
 
   int count();
 

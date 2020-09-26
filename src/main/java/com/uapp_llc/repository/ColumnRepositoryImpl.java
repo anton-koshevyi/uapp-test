@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import com.uapp_llc.model.Column;
@@ -32,13 +33,13 @@ public class ColumnRepositoryImpl implements ColumnRepository {
   }
 
   @Override
-  public List<Column> findAll() {
-    return delegate.findAll();
+  public Page<Column> findAll(Pageable pageable) {
+    return delegate.findAll(pageable);
   }
 
   @Override
-  public Page<Column> findAll(Pageable pageable) {
-    return delegate.findAll(pageable);
+  public List<Column> findAllByOrderByIndex() {
+    return delegate.findAll(Sort.by("index"));
   }
 
   @Override

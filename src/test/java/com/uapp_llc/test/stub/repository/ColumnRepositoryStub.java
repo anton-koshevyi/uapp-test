@@ -1,7 +1,9 @@
 package com.uapp_llc.test.stub.repository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,14 +38,16 @@ public class ColumnRepositoryStub
   }
 
   @Override
-  public List<Column> findAll() {
-    return super.findAll();
-  }
-
-  @Override
   public Page<Column> findAll(Pageable pageable) {
     List<Column> entities = super.findAll();
     return new PageImpl<>(entities);
+  }
+
+  @Override
+  public List<Column> findAllByOrderByIndex() {
+    return super.findAll().stream()
+        .sorted(Comparator.comparingInt(Column::getIndex))
+        .collect(Collectors.toList());
   }
 
   @Override

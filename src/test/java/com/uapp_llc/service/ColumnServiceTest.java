@@ -112,7 +112,7 @@ public class ColumnServiceTest {
     service.changeIndex(1L, 0);
 
     Assertions
-        .assertThat(repository.findAll())
+        .assertThat(repository.findAllByOrderByIndex())
         .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
         .containsExactlyInAnyOrder(
             ModelFactoryProducer.getFactory(Column.class)
@@ -140,7 +140,7 @@ public class ColumnServiceTest {
     service.changeIndex(2L, 0);
 
     Assertions
-        .assertThat(repository.findAll())
+        .assertThat(repository.findAllByOrderByIndex())
         .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
         .containsExactlyInAnyOrder(
             ModelFactoryProducer.getFactory(Column.class)
@@ -168,7 +168,7 @@ public class ColumnServiceTest {
     service.changeIndex(1L, 1);
 
     Assertions
-        .assertThat(repository.findAll())
+        .assertThat(repository.findAllByOrderByIndex())
         .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
         .containsExactlyInAnyOrder(
             ModelFactoryProducer.getFactory(Column.class)

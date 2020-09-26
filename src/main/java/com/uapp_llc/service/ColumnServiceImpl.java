@@ -54,11 +54,11 @@ public class ColumnServiceImpl implements ColumnService {
       return entity;
     }
 
-    List<Column> columns = repository.findAll();
-
-    if (index < 0 || index >= columns.size()) {
+    if (index < 0 || index >= repository.count()) {
       throw new IllegalActionException("New column index out of bounds: " + index);
     }
+
+    List<Column> columns = repository.findAllByOrderByIndex();
 
     if (actual > index) {
       int temp = index;

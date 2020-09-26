@@ -13,8 +13,6 @@ import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Project;
 import com.uapp_llc.repository.ColumnRepository;
-import com.uapp_llc.util.CollectionUtil;
-import com.uapp_llc.util.NullableUtil;
 
 @Service
 public class ColumnServiceImpl implements ColumnService {
@@ -31,6 +29,7 @@ public class ColumnServiceImpl implements ColumnService {
   public Column create(Project project, String name) {
     Column entity = new Column();
     entity.setName(name);
+    entity.setIndex(project.getColumns().size());
     entity.setProject(project);
     return repository.save(entity);
   }
@@ -39,7 +38,11 @@ public class ColumnServiceImpl implements ColumnService {
   @Override
   public Column update(Long id, Long projectId, String name) {
     Column entity = this.find(id, projectId);
-    NullableUtil.set(entity::setName, name);
+
+    if (name != null) {
+      entity.setName(name);
+    }
+
     return repository.save(entity);
   }
 
@@ -47,25 +50,34 @@ public class ColumnServiceImpl implements ColumnService {
   @Override
   public Column changeIndex(Long id, Long projectId, Integer index) {
     Column entity = this.find(id, projectId);
-    Project project = entity.getProject();
-    List<Column> columns = project.getColumns();
+    Integer actual = entity.getIndex();
 
-    for (int i = 0; i < columns.size(); i++) {
-      Column column = columns.get(i);
+    if (actual.equals(index)) {
+      return entity;
+    }
 
-      if (id.equals(column.getId())) {
-        try {
-          List<Column> rearranged = CollectionUtil.move(columns, i, index);
-          project.setColumns(rearranged);
-          break;
-        } catch (IndexOutOfBoundsException e) {
-          throw new IllegalActionException(
-              "illegalAction.column.indexOutOfBounds", index);
-        }
+    List<Column> columns = entity.getProject().getColumns();
+
+    if (index < 0 || index >= columns.size()) {
+      throw new IllegalActionException(
+          "illegalAction.column.changeIndexOutOfBounds", index);
+    }
+
+    if (actual > index) {
+      int temp = index;
+
+      for (int i = index; i < actual; i++) {
+        columns.get(i).setIndex(++temp);
+      }
+    } else {
+      int temp = actual;
+
+      for (int i = actual + 1; i <= index; i++) {
+        columns.get(i).setIndex(temp++);
       }
     }
 
-    entity.setProject(project);
+    entity.setIndex(index);
     return repository.save(entity);
   }
 

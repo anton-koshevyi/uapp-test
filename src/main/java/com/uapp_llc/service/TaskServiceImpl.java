@@ -13,8 +13,6 @@ import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Task;
 import com.uapp_llc.repository.TaskRepository;
-import com.uapp_llc.util.CollectionUtil;
-import com.uapp_llc.util.NullableUtil;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -33,6 +31,7 @@ public class TaskServiceImpl implements TaskService {
     entity.setName(name);
     entity.setDescription(description);
     entity.setColumn(column);
+    entity.setIndex(column.getTasks().size());
     return repository.save(entity);
   }
 
@@ -40,8 +39,15 @@ public class TaskServiceImpl implements TaskService {
   @Override
   public Task update(Long id, Long columnId, String name, String description) {
     Task entity = this.find(id, columnId);
-    NullableUtil.set(entity::setName, name);
-    NullableUtil.set(entity::setDescription, description);
+
+    if (name != null) {
+      entity.setName(name);
+    }
+
+    if (description != null) {
+      entity.setDescription(description);
+    }
+
     return repository.save(entity);
   }
 
@@ -49,11 +55,13 @@ public class TaskServiceImpl implements TaskService {
   @Override
   public Task move(Long id, Long columnId, Column newColumn, Integer newIndex) {
     Task entity = this.find(id, columnId);
-    NullableUtil.set(entity::setColumn, newColumn);
+
+    if (newColumn != null) {
+      entity.setColumn(newColumn);
+    }
 
     if (newIndex != null) {
-      Column rearranged = changeIndex(entity, newIndex);
-      entity.setColumn(rearranged);
+      changeIndex(entity, newIndex);
     }
 
     return repository.save(entity);
@@ -78,27 +86,35 @@ public class TaskServiceImpl implements TaskService {
     repository.delete(entity);
   }
 
-  private Column changeIndex(Task entity, int index) {
-    Long id = entity.getId();
-    Column column = entity.getColumn();
-    List<Task> tasks = column.getTasks();
+  private void changeIndex(Task entity, Integer index) {
+    Integer actual = entity.getIndex();
 
-    for (int i = 0; i < tasks.size(); i++) {
-      Task task = tasks.get(i);
+    if (actual.equals(index)) {
+      return;
+    }
 
-      if (id.equals(task.getId())) {
-        try {
-          List<Task> rearranged = CollectionUtil.move(tasks, i, index);
-          column.setTasks(rearranged);
-          break;
-        } catch (IndexOutOfBoundsException e) {
-          throw new IllegalActionException(
-              "illegalAction.task.indexOutOfBounds", index);
-        }
+    List<Task> tasks = entity.getColumn().getTasks();
+
+    if (index < 0 || index >= tasks.size()) {
+      throw new IllegalActionException(
+          "illegalAction.task.moveIndexOutOfBounds", index);
+    }
+
+    if (actual > index) {
+      int temp = index;
+
+      for (int i = index; i < actual; i++) {
+        tasks.get(i).setIndex(++temp);
+      }
+    } else {
+      int temp = actual;
+
+      for (int i = actual + 1; i <= index; i++) {
+        tasks.get(i).setIndex(temp++);
       }
     }
 
-    return column;
+    entity.setIndex(index);
   }
 
 }

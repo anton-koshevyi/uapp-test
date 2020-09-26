@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,8 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.uapp_llc.dto.column.ColumnDto;
 import com.uapp_llc.dto.column.ContentDto;
-import com.uapp_llc.dto.column.ContentDto.CreateColumn;
-import com.uapp_llc.dto.column.ContentDto.UpdateColumn;
 import com.uapp_llc.dto.column.MoveDto;
 import com.uapp_llc.mapper.ColumnMapper;
 import com.uapp_llc.model.Column;
@@ -46,7 +43,7 @@ public class ColumnController {
 
   @PostMapping("/projects/{projectId}/columns")
   public ColumnDto create(@PathVariable Long projectId,
-                          @Validated(CreateColumn.class) @RequestBody ContentDto dto) {
+                          @RequestBody ContentDto dto) {
     Project project = projectService.find(projectId);
     Column column = columnService.create(
         project,
@@ -65,7 +62,7 @@ public class ColumnController {
   @PatchMapping("/projects/{projectId}/columns/{id}")
   public ColumnDto update(@PathVariable Long projectId,
                           @PathVariable Long id,
-                          @Validated(UpdateColumn.class) @RequestBody ContentDto dto) {
+                          @RequestBody ContentDto dto) {
     Column column = columnService.update(
         id,
         projectId,

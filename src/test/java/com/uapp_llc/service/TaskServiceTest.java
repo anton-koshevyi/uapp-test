@@ -247,7 +247,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  public void move_whenNewColumnNotNull() {
+  public void move_whenNewColumnNotNull_expectMoveAtLastIndex() {
     Column monday = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
         .setId(1L);
@@ -258,6 +258,11 @@ public class TaskServiceTest {
     repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
         .setColumn(monday));
+    identification.setStrategy(e -> e.setId(2L));
+    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
+        .createModel(TaskType.MEETING)
+        .setColumn(wednesday));
+    wednesday.setTasks(Lists.newArrayList(meeting));
 
     Assertions
         .assertThat(service.move(1L, 1L, wednesday, null))
@@ -265,6 +270,37 @@ public class TaskServiceTest {
         .isEqualTo(ModelFactoryProducer.getFactory(Task.class)
             .createModel(TaskType.JOB)
             .setId(1L)
+            .setIndex(1)
+            .setColumn(ModelFactoryProducer.getFactory(Column.class)
+                .createModel(ColumnType.WEDNESDAY)
+                .setId(2L)));
+  }
+
+  @Test
+  public void move() {
+    Column monday = ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.MONDAY)
+        .setId(1L);
+    Column wednesday = ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.WEDNESDAY)
+        .setId(2L);
+    identification.setStrategy(e -> e.setId(1L));
+    repository.save(ModelFactoryProducer.getFactory(Task.class)
+        .createModel(TaskType.JOB)
+        .setColumn(monday));
+    identification.setStrategy(e -> e.setId(2L));
+    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
+        .createModel(TaskType.MEETING)
+        .setColumn(wednesday));
+    wednesday.setTasks(Lists.newArrayList(meeting));
+
+    Assertions
+        .assertThat(service.move(1L, 1L, wednesday, 0))
+        .usingComparator(ComparatorFactory.getComparator(Task.class))
+        .isEqualTo(ModelFactoryProducer.getFactory(Task.class)
+            .createModel(TaskType.JOB)
+            .setId(1L)
+            .setIndex(0)
             .setColumn(ModelFactoryProducer.getFactory(Column.class)
                 .createModel(ColumnType.WEDNESDAY)
                 .setId(2L)));

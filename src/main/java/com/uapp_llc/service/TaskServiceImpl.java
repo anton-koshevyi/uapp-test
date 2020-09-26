@@ -57,6 +57,7 @@ public class TaskServiceImpl implements TaskService {
     Task entity = this.find(id, columnId);
 
     if (newColumn != null) {
+      entity.setIndex(newColumn.getTasks().size());
       entity.setColumn(newColumn);
     }
 

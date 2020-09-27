@@ -101,16 +101,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     if (actual > index) {
-      int temp = index;
-
       for (int i = index; i < actual; i++) {
-        tasks.get(i).setIndex(++temp);
+        tasks.get(i).setIndex(i + 1);
       }
     } else {
-      int temp = actual;
-
-      for (int i = actual + 1; i <= index; i++) {
-        tasks.get(i).setIndex(temp++);
+      for (int i = index; i > actual; i--) {
+        tasks.get(i).setIndex(i - 1);
       }
     }
 

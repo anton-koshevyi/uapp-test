@@ -61,16 +61,12 @@ public class ColumnServiceImpl implements ColumnService {
     List<Column> columns = repository.findAllByOrderByIndex();
 
     if (actual > index) {
-      int temp = index;
-
       for (int i = index; i < actual; i++) {
-        columns.get(i).setIndex(++temp);
+        columns.get(i).setIndex(i + 1);
       }
     } else {
-      int temp = actual;
-
-      for (int i = actual + 1; i <= index; i++) {
-        columns.get(i).setIndex(temp++);
+      for (int i = index; i > actual; i--) {
+        columns.get(i).setIndex(i - 1);
       }
     }
 

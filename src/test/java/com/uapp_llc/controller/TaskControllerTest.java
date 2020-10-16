@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Lists;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,9 +27,11 @@ import com.uapp_llc.repository.TaskRepository;
 import com.uapp_llc.service.ColumnServiceImpl;
 import com.uapp_llc.service.TaskServiceImpl;
 import com.uapp_llc.test.LazyInitBeanFactoryPostProcessor;
-import com.uapp_llc.test.model.ModelFactoryProducer;
-import com.uapp_llc.test.model.column.ColumnType;
-import com.uapp_llc.test.model.task.TaskType;
+import com.uapp_llc.test.model.factory.ModelFactory;
+import com.uapp_llc.test.model.mutator.ColumnMutators;
+import com.uapp_llc.test.model.mutator.TaskMutators;
+import com.uapp_llc.test.model.type.ColumnType;
+import com.uapp_llc.test.model.type.TaskType;
 import com.uapp_llc.test.stub.repository.ColumnRepositoryStub;
 import com.uapp_llc.test.stub.repository.TaskRepositoryStub;
 import com.uapp_llc.test.stub.repository.identification.IdentificationContext;
@@ -73,13 +74,14 @@ public class TaskControllerTest {
 
   @Test
   public void getAll() throws JSONException {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    Column column = columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    Column column = columnRepository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
-    taskIdentification.setStrategy(e -> e.setId(1L));
-    taskRepository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setColumn(column));
+    taskIdentification.setStrategy(TaskMutators.id(1L)::accept);
+    taskRepository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(column))
+        .getModel());
 
     String response = RestAssuredMockMvc
         .given()
@@ -115,10 +117,10 @@ public class TaskControllerTest {
 
   @Test
   public void create() throws JSONException {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    columnRepository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
-    taskIdentification.setStrategy(e -> e.setId(1L));
+    taskIdentification.setStrategy(TaskMutators.id(1L)::accept);
 
     String actual = RestAssuredMockMvc
         .given()
@@ -155,13 +157,14 @@ public class TaskControllerTest {
 
   @Test
   public void get() throws JSONException {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    Column column = columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    Column column = columnRepository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
-    taskIdentification.setStrategy(e -> e.setId(1L));
-    taskRepository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setColumn(column));
+    taskIdentification.setStrategy(TaskMutators.id(1L)::accept);
+    taskRepository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(column))
+        .getModel());
 
     String actual = RestAssuredMockMvc
         .given()
@@ -193,13 +196,14 @@ public class TaskControllerTest {
 
   @Test
   public void update() throws JSONException {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    Column column = columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    Column column = columnRepository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
-    taskIdentification.setStrategy(e -> e.setId(1L));
-    taskRepository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setColumn(column));
+    taskIdentification.setStrategy(TaskMutators.id(1L)::accept);
+    taskRepository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(column))
+        .getModel());
 
     String actual = RestAssuredMockMvc
         .given()
@@ -236,22 +240,24 @@ public class TaskControllerTest {
 
   @Test
   public void move() throws JSONException {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    Column monday = columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    Column monday = columnRepository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
-    columnIdentification.setStrategy(e -> e.setId(2L));
-    Column wednesday = columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(2L)::accept);
+    Column wednesday = columnRepository.save(ModelFactory
         .createModel(ColumnType.WEDNESDAY));
-    taskIdentification.setStrategy(e -> e.setId(1L));
-    Task job = taskRepository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setColumn(monday));
-    taskIdentification.setStrategy(e -> e.setId(2L));
-    Task meeting = taskRepository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.MEETING)
-        .setColumn(wednesday));
-    monday.setTasks(Lists.newArrayList(job));
-    wednesday.setTasks(Lists.newArrayList(meeting));
+    taskIdentification.setStrategy(TaskMutators.id(1L)::accept);
+    Task job = taskRepository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(monday))
+        .getModel());
+    taskIdentification.setStrategy(TaskMutators.id(2L)::accept);
+    Task meeting = taskRepository.save(ModelFactory
+        .createWrapper(TaskType.MEETING)
+        .with(TaskMutators.column(wednesday))
+        .getModel());
+    ColumnMutators.tasks(job).accept(monday);
+    ColumnMutators.tasks(meeting).accept(wednesday);
 
     String actual = RestAssuredMockMvc
         .given()
@@ -288,13 +294,14 @@ public class TaskControllerTest {
 
   @Test
   public void delete() {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    Column column = columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    Column column = columnRepository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
-    taskIdentification.setStrategy(e -> e.setId(1L));
-    taskRepository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setColumn(column));
+    taskIdentification.setStrategy(TaskMutators.id(1L)::accept);
+    taskRepository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(column))
+        .getModel());
 
     RestAssuredMockMvc
         .delete("/columns/{columnId}/tasks/{id}", 1, 1)

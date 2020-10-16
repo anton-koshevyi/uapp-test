@@ -22,8 +22,9 @@ import com.uapp_llc.model.Column;
 import com.uapp_llc.repository.ColumnRepository;
 import com.uapp_llc.service.ColumnServiceImpl;
 import com.uapp_llc.test.LazyInitBeanFactoryPostProcessor;
-import com.uapp_llc.test.model.ModelFactoryProducer;
-import com.uapp_llc.test.model.column.ColumnType;
+import com.uapp_llc.test.model.factory.ModelFactory;
+import com.uapp_llc.test.model.mutator.ColumnMutators;
+import com.uapp_llc.test.model.type.ColumnType;
 import com.uapp_llc.test.stub.repository.ColumnRepositoryStub;
 import com.uapp_llc.test.stub.repository.identification.IdentificationContext;
 
@@ -59,8 +60,8 @@ public class ColumnControllerTest {
 
   @Test
   public void getAll() throws JSONException {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    columnRepository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
 
     String response = RestAssuredMockMvc
@@ -87,7 +88,7 @@ public class ColumnControllerTest {
 
   @Test
   public void create() throws JSONException {
-    columnIdentification.setStrategy(e -> e.setId(1L));
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
 
     String actual = RestAssuredMockMvc
         .given()
@@ -112,8 +113,8 @@ public class ColumnControllerTest {
 
   @Test
   public void get() throws JSONException {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    columnRepository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
 
     String actual = RestAssuredMockMvc
@@ -137,8 +138,8 @@ public class ColumnControllerTest {
 
   @Test
   public void update() throws JSONException {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    columnRepository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
 
     String actual = RestAssuredMockMvc
@@ -164,14 +165,16 @@ public class ColumnControllerTest {
 
   @Test
   public void changeIndex() throws JSONException {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setIndex(0));
-    columnIdentification.setStrategy(e -> e.setId(2L));
-    columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.WEDNESDAY)
-        .setIndex(1));
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    columnRepository.save(ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.index(0))
+        .getModel());
+    columnIdentification.setStrategy(ColumnMutators.id(2L)::accept);
+    columnRepository.save(ModelFactory
+        .createWrapper(ColumnType.WEDNESDAY)
+        .with(ColumnMutators.index(1))
+        .getModel());
 
     String actual = RestAssuredMockMvc
         .given()
@@ -196,8 +199,8 @@ public class ColumnControllerTest {
 
   @Test
   public void delete() {
-    columnIdentification.setStrategy(e -> e.setId(1L));
-    columnRepository.save(ModelFactoryProducer.getFactory(Column.class)
+    columnIdentification.setStrategy(ColumnMutators.id(1L)::accept);
+    columnRepository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
 
     RestAssuredMockMvc

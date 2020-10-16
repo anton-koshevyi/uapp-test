@@ -11,8 +11,9 @@ import com.uapp_llc.exception.IllegalActionException;
 import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Column;
 import com.uapp_llc.test.comparator.ComparatorFactory;
-import com.uapp_llc.test.model.ModelFactoryProducer;
-import com.uapp_llc.test.model.column.ColumnType;
+import com.uapp_llc.test.model.factory.ModelFactory;
+import com.uapp_llc.test.model.mutator.ColumnMutators;
+import com.uapp_llc.test.model.type.ColumnType;
 import com.uapp_llc.test.stub.repository.ColumnRepositoryStub;
 import com.uapp_llc.test.stub.repository.identification.IdentificationContext;
 
@@ -31,19 +32,17 @@ public class ColumnServiceTest {
 
   @Test
   public void create() {
-    identification.setStrategy(e -> e.setId(1L));
+    identification.setStrategy(ColumnMutators.id(1L)::accept);
 
-    service.create(
-        "Monday tasks"
-    );
+    service.create("Monday tasks");
 
     Assertions
         .assertThat(repository.find(1L))
         .usingComparator(ComparatorFactory.getComparator(Column.class))
-        .isEqualTo(new Column()
-            .setId(1L)
-            .setName("Monday tasks")
-            .setIndex(0));
+        .isEqualTo(ModelFactory
+            .createWrapper(ColumnType.MONDAY)
+            .with(ColumnMutators.id(1L))
+            .getModel());
   }
 
   @Test
@@ -56,22 +55,20 @@ public class ColumnServiceTest {
 
   @Test
   public void update() {
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
+    identification.setStrategy(ColumnMutators.id(1L)::accept);
+    repository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
 
-    service.update(
-        1L,
-        "Tuesday tasks"
-    );
+    service.update(1L, "Tuesday tasks");
 
     Assertions
         .assertThat(repository.find(1L))
         .usingComparator(ComparatorFactory.getComparator(Column.class))
-        .isEqualTo(ModelFactoryProducer.getFactory(Column.class)
-            .createModel(ColumnType.MONDAY)
-            .setId(1L)
-            .setName("Tuesday tasks"));
+        .isEqualTo(ModelFactory
+            .createWrapper(ColumnType.MONDAY)
+            .with(ColumnMutators.id(1L))
+            .with(ColumnMutators.name("Tuesday tasks"))
+            .getModel());
   }
 
   @Test
@@ -85,11 +82,11 @@ public class ColumnServiceTest {
   @ParameterizedTest
   @ValueSource(ints = {-1, 2})
   public void changeIndex_whenIndexOutOfBounds_expectException(int newIndex) {
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
+    identification.setStrategy(ColumnMutators.id(1L)::accept);
+    repository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
-    identification.setStrategy(e -> e.setId(2L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
+    identification.setStrategy(ColumnMutators.id(2L)::accept);
+    repository.save(ModelFactory
         .createModel(ColumnType.WEDNESDAY));
 
     Assertions
@@ -100,14 +97,16 @@ public class ColumnServiceTest {
 
   @Test
   public void changeIndex_whenIndexEqualToActual_expectNoChanges() {
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setIndex(0));
-    identification.setStrategy(e -> e.setId(2L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.WEDNESDAY)
-        .setIndex(1));
+    identification.setStrategy(ColumnMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.index(0))
+        .getModel());
+    identification.setStrategy(ColumnMutators.id(2L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(ColumnType.WEDNESDAY)
+        .with(ColumnMutators.index(1))
+        .getModel());
 
     service.changeIndex(1L, 0);
 
@@ -115,27 +114,31 @@ public class ColumnServiceTest {
         .assertThat(repository.findAllByOrderByIndex())
         .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
         .containsExactlyInAnyOrder(
-            ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.MONDAY)
-                .setId(1L)
-                .setIndex(0),
-            ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.WEDNESDAY)
-                .setId(2L)
-                .setIndex(1)
+            ModelFactory
+                .createWrapper(ColumnType.MONDAY)
+                .with(ColumnMutators.id(1L))
+                .with(ColumnMutators.index(0))
+                .getModel(),
+            ModelFactory
+                .createWrapper(ColumnType.WEDNESDAY)
+                .with(ColumnMutators.id(2L))
+                .with(ColumnMutators.index(1))
+                .getModel()
         );
   }
 
   @Test
   public void changeIndex_whenIndexAfterActual() {
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setIndex(0));
-    identification.setStrategy(e -> e.setId(2L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.WEDNESDAY)
-        .setIndex(1));
+    identification.setStrategy(ColumnMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.index(0))
+        .getModel());
+    identification.setStrategy(ColumnMutators.id(2L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(ColumnType.WEDNESDAY)
+        .with(ColumnMutators.index(1))
+        .getModel());
 
     service.changeIndex(2L, 0);
 
@@ -143,27 +146,31 @@ public class ColumnServiceTest {
         .assertThat(repository.findAllByOrderByIndex())
         .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
         .containsExactlyInAnyOrder(
-            ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.MONDAY)
-                .setId(1L)
-                .setIndex(1),
-            ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.WEDNESDAY)
-                .setId(2L)
-                .setIndex(0)
+            ModelFactory
+                .createWrapper(ColumnType.MONDAY)
+                .with(ColumnMutators.id(1L))
+                .with(ColumnMutators.index(1))
+                .getModel(),
+            ModelFactory
+                .createWrapper(ColumnType.WEDNESDAY)
+                .with(ColumnMutators.id(2L))
+                .with(ColumnMutators.index(0))
+                .getModel()
         );
   }
 
   @Test
   public void changeIndex_whenIndexBeforeActual() {
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setIndex(0));
-    identification.setStrategy(e -> e.setId(2L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.WEDNESDAY)
-        .setIndex(1));
+    identification.setStrategy(ColumnMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.index(0))
+        .getModel());
+    identification.setStrategy(ColumnMutators.id(2L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(ColumnType.WEDNESDAY)
+        .with(ColumnMutators.index(1))
+        .getModel());
 
     service.changeIndex(1L, 1);
 
@@ -171,14 +178,16 @@ public class ColumnServiceTest {
         .assertThat(repository.findAllByOrderByIndex())
         .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
         .containsExactlyInAnyOrder(
-            ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.MONDAY)
-                .setId(1L)
-                .setIndex(1),
-            ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.WEDNESDAY)
-                .setId(2L)
-                .setIndex(0)
+            ModelFactory
+                .createWrapper(ColumnType.MONDAY)
+                .with(ColumnMutators.id(1L))
+                .with(ColumnMutators.index(1))
+                .getModel(),
+            ModelFactory
+                .createWrapper(ColumnType.WEDNESDAY)
+                .with(ColumnMutators.id(2L))
+                .with(ColumnMutators.index(0))
+                .getModel()
         );
   }
 
@@ -192,37 +201,40 @@ public class ColumnServiceTest {
 
   @Test
   public void find() {
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
+    identification.setStrategy(ColumnMutators.id(1L)::accept);
+    repository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
 
     Assertions
         .assertThat(service.find(1L))
         .usingComparator(ComparatorFactory.getComparator(Column.class))
-        .isEqualTo(ModelFactoryProducer.getFactory(Column.class)
-            .createModel(ColumnType.MONDAY)
-            .setId(1L));
+        .isEqualTo(ModelFactory
+            .createWrapper(ColumnType.MONDAY)
+            .with(ColumnMutators.id(1L))
+            .getModel());
   }
 
   @Test
   public void findAll() {
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
+    identification.setStrategy(ColumnMutators.id(1L)::accept);
+    repository.save(ModelFactory
         .createModel(ColumnType.MONDAY));
-    identification.setStrategy(e -> e.setId(2L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
+    identification.setStrategy(ColumnMutators.id(2L)::accept);
+    repository.save(ModelFactory
         .createModel(ColumnType.WEDNESDAY));
 
     Assertions
         .assertThat(service.findAll(Pageable.unpaged()))
         .usingComparatorForType(ComparatorFactory.getComparator(Column.class), Column.class)
         .containsExactlyInAnyOrder(
-            ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.MONDAY)
-                .setId(1L),
-            ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.WEDNESDAY)
-                .setId(2L)
+            ModelFactory
+                .createWrapper(ColumnType.MONDAY)
+                .with(ColumnMutators.id(1L))
+                .getModel(),
+            ModelFactory
+                .createWrapper(ColumnType.WEDNESDAY)
+                .with(ColumnMutators.id(2L))
+                .getModel()
         );
   }
 
@@ -235,15 +247,31 @@ public class ColumnServiceTest {
   }
 
   @Test
+  public void delete_whenLastEntity_expectChangeIndexTo0() {
+    identification.setStrategy(ColumnMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .getModel());
+
+    service.delete(1L);
+
+    Assertions
+        .assertThat(repository.find(1L))
+        .isNull();
+  }
+
+  @Test
   public void delete_expectChangeIndexToLast() {
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setIndex(0));
-    identification.setStrategy(e -> e.setId(2L));
-    repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.WEDNESDAY)
-        .setIndex(1));
+    identification.setStrategy(ColumnMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.index(0))
+        .getModel());
+    identification.setStrategy(ColumnMutators.id(2L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(ColumnType.WEDNESDAY)
+        .with(ColumnMutators.index(1))
+        .getModel());
 
     service.delete(1L);
 
@@ -253,10 +281,11 @@ public class ColumnServiceTest {
     Assertions
         .assertThat(repository.find(2L))
         .usingComparator(ComparatorFactory.getComparator(Column.class))
-        .isEqualTo(ModelFactoryProducer.getFactory(Column.class)
-            .createModel(ColumnType.WEDNESDAY)
-            .setId(2L)
-            .setIndex(0));
+        .isEqualTo(ModelFactory
+            .createWrapper(ColumnType.WEDNESDAY)
+            .with(ColumnMutators.id(2L))
+            .with(ColumnMutators.index(0))
+            .getModel());
   }
 
 }

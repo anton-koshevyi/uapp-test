@@ -1,8 +1,6 @@
 package com.uapp_llc.service;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Lists;
-import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,9 +12,11 @@ import com.uapp_llc.exception.NotFoundException;
 import com.uapp_llc.model.Column;
 import com.uapp_llc.model.Task;
 import com.uapp_llc.test.comparator.ComparatorFactory;
-import com.uapp_llc.test.model.ModelFactoryProducer;
-import com.uapp_llc.test.model.column.ColumnType;
-import com.uapp_llc.test.model.task.TaskType;
+import com.uapp_llc.test.model.factory.ModelFactory;
+import com.uapp_llc.test.model.mutator.ColumnMutators;
+import com.uapp_llc.test.model.mutator.TaskMutators;
+import com.uapp_llc.test.model.type.ColumnType;
+import com.uapp_llc.test.model.type.TaskType;
 import com.uapp_llc.test.stub.repository.TaskRepositoryStub;
 import com.uapp_llc.test.stub.repository.identification.IdentificationContext;
 
@@ -35,10 +35,11 @@ public class TaskServiceTest {
 
   @Test
   public void create() {
-    Column column = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(2L);
-    identification.setStrategy(e -> e.setId(1L));
+    Column column = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(2L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
 
     service.create(
         column,
@@ -49,14 +50,14 @@ public class TaskServiceTest {
     Assertions
         .assertThat(repository.find(1L))
         .usingComparator(ComparatorFactory.getComparator(Task.class))
-        .isEqualTo(new Task()
-            .setId(1L)
-            .setName("Job")
-            .setDescription("Go to job")
-            .setIndex(0)
-            .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.MONDAY)
-                .setId(2L)));
+        .isEqualTo(ModelFactory
+            .createWrapper(TaskType.JOB)
+            .with(TaskMutators.id(1L))
+            .with(TaskMutators.column(ModelFactory
+                .createWrapper(ColumnType.MONDAY)
+                .with(ColumnMutators.id(2L))
+                .getModel()))
+            .getModel());
   }
 
   @Test
@@ -69,13 +70,15 @@ public class TaskServiceTest {
 
   @Test
   public void update() {
-    Column column = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(2L);
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setColumn(column));
+    Column column = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(2L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(column))
+        .getModel());
 
     service.update(
         1L,
@@ -87,14 +90,16 @@ public class TaskServiceTest {
     Assertions
         .assertThat(repository.find(1L))
         .usingComparator(ComparatorFactory.getComparator(Task.class))
-        .isEqualTo(ModelFactoryProducer.getFactory(Task.class)
-            .createModel(TaskType.JOB)
-            .setId(1L)
-            .setName("Meeting")
-            .setDescription("Meet John")
-            .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.MONDAY)
-                .setId(2L)));
+        .isEqualTo(ModelFactory
+            .createWrapper(TaskType.JOB)
+            .with(TaskMutators.id(1L))
+            .with(TaskMutators.name("Meeting"))
+            .with(TaskMutators.description("Meet John"))
+            .with(TaskMutators.column(ModelFactory
+                .createWrapper(ColumnType.MONDAY)
+                .with(ColumnMutators.id(2L))
+                .getModel()))
+            .getModel());
   }
 
   @Test
@@ -108,19 +113,22 @@ public class TaskServiceTest {
   @ParameterizedTest
   @ValueSource(ints = {-1, 2})
   public void move_whenIndexOutOfBounds_expectException(int newIndex) {
-    Column column = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(1L);
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setIndex(0)
-        .setColumn(column));
-    identification.setStrategy(e -> e.setId(2L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.MEETING)
-        .setIndex(1)
-        .setColumn(column));
+    Column column = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(1L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.index(0))
+        .with(TaskMutators.column(column))
+        .getModel());
+    identification.setStrategy(TaskMutators.id(2L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(TaskType.MEETING)
+        .with(TaskMutators.index(1))
+        .with(TaskMutators.column(column))
+        .getModel());
 
     Assertions
         .assertThatThrownBy(() -> service.move(2L, 1L, null, newIndex))
@@ -130,19 +138,22 @@ public class TaskServiceTest {
 
   @Test
   public void move_whenNewIndexNotNull_andNewIndexEqualToActual_expectNoChanges() {
-    Column column = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(1L);
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setIndex(0)
-        .setColumn(column));
-    identification.setStrategy(e -> e.setId(2L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.MEETING)
-        .setIndex(1)
-        .setColumn(column));
+    Column column = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(1L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.index(0))
+        .with(TaskMutators.column(column))
+        .getModel());
+    identification.setStrategy(TaskMutators.id(2L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(TaskType.MEETING)
+        .with(TaskMutators.index(1))
+        .with(TaskMutators.column(column))
+        .getModel());
 
     service.move(2L, 1L, null, 1);
 
@@ -150,39 +161,46 @@ public class TaskServiceTest {
         .assertThat(repository.findAll())
         .usingComparatorForType(ComparatorFactory.getComparator(Task.class), Task.class)
         .containsExactlyInAnyOrder(
-            ModelFactoryProducer.getFactory(Task.class)
-                .createModel(TaskType.JOB)
-                .setId(1L)
-                .setIndex(0)
-                .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                    .createModel(ColumnType.MONDAY)
-                    .setId(1L)),
-            ModelFactoryProducer.getFactory(Task.class)
-                .createModel(TaskType.MEETING)
-                .setId(2L)
-                .setIndex(1)
-                .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                    .createModel(ColumnType.MONDAY)
-                    .setId(1L))
+            ModelFactory
+                .createWrapper(TaskType.JOB)
+                .with(TaskMutators.id(1L))
+                .with(TaskMutators.index(0))
+                .with(TaskMutators.column(ModelFactory
+                    .createWrapper(ColumnType.MONDAY)
+                    .with(ColumnMutators.id(1L))
+                    .getModel()))
+                .getModel(),
+            ModelFactory
+                .createWrapper(TaskType.MEETING)
+                .with(TaskMutators.id(2L))
+                .with(TaskMutators.index(1))
+                .with(TaskMutators.column(ModelFactory
+                    .createWrapper(ColumnType.MONDAY)
+                    .with(ColumnMutators.id(1L))
+                    .getModel()))
+                .getModel()
         );
   }
 
   @Test
   public void move_whenNewIndexNotNull_andNewIndexAfterActual() {
-    Column column = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(1L);
-    identification.setStrategy(e -> e.setId(1L));
-    Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setIndex(0)
-        .setColumn(column));
-    identification.setStrategy(e -> e.setId(2L));
-    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.MEETING)
-        .setIndex(1)
-        .setColumn(column));
-    column.setTasks(Lists.newArrayList(job, meeting));
+    Column column = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(1L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    Task job = repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.index(0))
+        .with(TaskMutators.column(column))
+        .getModel());
+    identification.setStrategy(TaskMutators.id(2L)::accept);
+    Task meeting = repository.save(ModelFactory
+        .createWrapper(TaskType.MEETING)
+        .with(TaskMutators.index(1))
+        .with(TaskMutators.column(column))
+        .getModel());
+    ColumnMutators.tasks(job, meeting).accept(column);
 
     service.move(1L, 1L, null, 1);
 
@@ -190,39 +208,46 @@ public class TaskServiceTest {
         .assertThat(repository.findAll())
         .usingComparatorForType(ComparatorFactory.getComparator(Task.class), Task.class)
         .containsExactlyInAnyOrder(
-            ModelFactoryProducer.getFactory(Task.class)
-                .createModel(TaskType.JOB)
-                .setId(1L)
-                .setIndex(1)
-                .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                    .createModel(ColumnType.MONDAY)
-                    .setId(1L)),
-            ModelFactoryProducer.getFactory(Task.class)
-                .createModel(TaskType.MEETING)
-                .setId(2L)
-                .setIndex(0)
-                .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                    .createModel(ColumnType.MONDAY)
-                    .setId(1L))
+            ModelFactory
+                .createWrapper(TaskType.JOB)
+                .with(TaskMutators.id(1L))
+                .with(TaskMutators.index(1))
+                .with(TaskMutators.column(ModelFactory
+                    .createWrapper(ColumnType.MONDAY)
+                    .with(ColumnMutators.id(1L))
+                    .getModel()))
+                .getModel(),
+            ModelFactory
+                .createWrapper(TaskType.MEETING)
+                .with(TaskMutators.id(2L))
+                .with(TaskMutators.index(0))
+                .with(TaskMutators.column(ModelFactory
+                    .createWrapper(ColumnType.MONDAY)
+                    .with(ColumnMutators.id(1L))
+                    .getModel()))
+                .getModel()
         );
   }
 
   @Test
   public void move_whenNewIndexNotNull_andNewIndexBeforeActual() {
-    Column column = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(1L);
-    identification.setStrategy(e -> e.setId(1L));
-    Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setIndex(0)
-        .setColumn(column));
-    identification.setStrategy(e -> e.setId(2L));
-    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.MEETING)
-        .setIndex(1)
-        .setColumn(column));
-    column.setTasks(Lists.newArrayList(job, meeting));
+    Column column = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(1L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    Task job = repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.index(0))
+        .with(TaskMutators.column(column))
+        .getModel());
+    identification.setStrategy(TaskMutators.id(2L)::accept);
+    Task meeting = repository.save(ModelFactory
+        .createWrapper(TaskType.MEETING)
+        .with(TaskMutators.index(1))
+        .with(TaskMutators.column(column))
+        .getModel());
+    ColumnMutators.tasks(job, meeting).accept(column);
 
     service.move(2L, 1L, null, 0);
 
@@ -230,81 +255,97 @@ public class TaskServiceTest {
         .assertThat(repository.findAll())
         .usingComparatorForType(ComparatorFactory.getComparator(Task.class), Task.class)
         .containsExactlyInAnyOrder(
-            ModelFactoryProducer.getFactory(Task.class)
-                .createModel(TaskType.JOB)
-                .setId(1L)
-                .setIndex(1)
-                .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                    .createModel(ColumnType.MONDAY)
-                    .setId(1L)),
-            ModelFactoryProducer.getFactory(Task.class)
-                .createModel(TaskType.MEETING)
-                .setId(2L)
-                .setIndex(0)
-                .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                    .createModel(ColumnType.MONDAY)
-                    .setId(1L))
+            ModelFactory
+                .createWrapper(TaskType.JOB)
+                .with(TaskMutators.id(1L))
+                .with(TaskMutators.index(1))
+                .with(TaskMutators.column(ModelFactory
+                    .createWrapper(ColumnType.MONDAY)
+                    .with(ColumnMutators.id(1L))
+                    .getModel()))
+                .getModel(),
+            ModelFactory
+                .createWrapper(TaskType.MEETING)
+                .with(TaskMutators.id(2L))
+                .with(TaskMutators.index(0))
+                .with(TaskMutators.column(ModelFactory
+                    .createWrapper(ColumnType.MONDAY)
+                    .with(ColumnMutators.id(1L))
+                    .getModel()))
+                .getModel()
         );
   }
 
   @Test
   public void move_whenNewColumnNotNull_expectMoveAtLastIndex() {
-    Column monday = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(1L);
-    Column wednesday = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.WEDNESDAY)
-        .setId(2L);
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setColumn(monday));
-    identification.setStrategy(e -> e.setId(2L));
-    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.MEETING)
-        .setColumn(wednesday));
-    wednesday.setTasks(Lists.newArrayList(meeting));
+    Column monday = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(1L))
+        .getModel();
+    Column wednesday = ModelFactory
+        .createWrapper(ColumnType.WEDNESDAY)
+        .with(ColumnMutators.id(2L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(monday))
+        .getModel());
+    identification.setStrategy(TaskMutators.id(2L)::accept);
+    Task meeting = repository.save(ModelFactory
+        .createWrapper(TaskType.MEETING)
+        .with(TaskMutators.column(wednesday))
+        .getModel());
+    ColumnMutators.tasks(meeting).accept(wednesday);
 
     Assertions
         .assertThat(service.move(1L, 1L, wednesday, null))
         .usingComparator(ComparatorFactory.getComparator(Task.class))
-        .isEqualTo(ModelFactoryProducer.getFactory(Task.class)
-            .createModel(TaskType.JOB)
-            .setId(1L)
-            .setIndex(1)
-            .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.WEDNESDAY)
-                .setId(2L)));
+        .isEqualTo(ModelFactory
+            .createWrapper(TaskType.JOB)
+            .with(TaskMutators.id(1L))
+            .with(TaskMutators.index(1))
+            .with(TaskMutators.column(ModelFactory
+                .createWrapper(ColumnType.WEDNESDAY)
+                .with(ColumnMutators.id(2L))
+                .getModel()))
+            .getModel());
   }
 
   @Test
   public void move() {
-    Column monday = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(1L);
-    Column wednesday = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.WEDNESDAY)
-        .setId(2L);
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setColumn(monday));
-    identification.setStrategy(e -> e.setId(2L));
-    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.MEETING)
-        .setColumn(wednesday));
-    wednesday.setTasks(Lists.newArrayList(meeting));
+    Column monday = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(1L))
+        .getModel();
+    Column wednesday = ModelFactory
+        .createWrapper(ColumnType.WEDNESDAY)
+        .with(ColumnMutators.id(2L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(monday))
+        .getModel());
+    identification.setStrategy(TaskMutators.id(2L)::accept);
+    Task meeting = repository.save(ModelFactory
+        .createWrapper(TaskType.MEETING)
+        .with(TaskMutators.column(wednesday))
+        .getModel());
+    ColumnMutators.tasks(meeting).accept(wednesday);
 
     Assertions
         .assertThat(service.move(1L, 1L, wednesday, 0))
         .usingComparator(ComparatorFactory.getComparator(Task.class))
-        .isEqualTo(ModelFactoryProducer.getFactory(Task.class)
-            .createModel(TaskType.JOB)
-            .setId(1L)
-            .setIndex(0)
-            .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.WEDNESDAY)
-                .setId(2L)));
+        .isEqualTo(ModelFactory
+            .createWrapper(TaskType.JOB)
+            .with(TaskMutators.id(1L))
+            .with(TaskMutators.index(0))
+            .with(TaskMutators.column(ModelFactory
+                .createWrapper(ColumnType.WEDNESDAY)
+                .with(ColumnMutators.id(2L))
+                .getModel()))
+            .getModel());
   }
 
   @Test
@@ -317,55 +358,66 @@ public class TaskServiceTest {
 
   @Test
   public void find() {
-    Column column = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(2L);
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setColumn(column));
+    Column column = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(2L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(column))
+        .getModel());
 
     Assertions
         .assertThat(service.find(1L, 2L))
         .usingComparator(ComparatorFactory.getComparator(Task.class))
-        .isEqualTo(ModelFactoryProducer.getFactory(Task.class)
-            .createModel(TaskType.JOB)
-            .setId(1L)
-            .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.MONDAY)
-                .setId(2L)));
+        .isEqualTo(ModelFactory
+            .createWrapper(TaskType.JOB)
+            .with(TaskMutators.id(1L))
+            .with(TaskMutators.column(ModelFactory
+                .createWrapper(ColumnType.MONDAY)
+                .with(ColumnMutators.id(2L))
+                .getModel()))
+            .getModel());
   }
 
   @Test
   public void findAll() {
-    Column column = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(2L);
-    identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setColumn(column));
-    identification.setStrategy(e -> e.setId(2L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.MEETING)
-        .setColumn(column));
+    Column column = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(2L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(column))
+        .getModel());
+    identification.setStrategy(TaskMutators.id(2L)::accept);
+    repository.save(ModelFactory
+        .createWrapper(TaskType.MEETING)
+        .with(TaskMutators.column(column))
+        .getModel());
 
     Assertions
         .assertThat(service.findAll(2L, Pageable.unpaged()))
         .usingComparatorForType(ComparatorFactory.getComparator(Task.class), Task.class)
         .containsExactlyInAnyOrder(
-            ModelFactoryProducer.getFactory(Task.class)
-                .createModel(TaskType.JOB)
-                .setId(1L)
-                .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                    .createModel(ColumnType.MONDAY)
-                    .setId(2L)),
-            ModelFactoryProducer.getFactory(Task.class)
-                .createModel(TaskType.MEETING)
-                .setId(2L)
-                .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                    .createModel(ColumnType.MONDAY)
-                    .setId(2L))
+            ModelFactory
+                .createWrapper(TaskType.JOB)
+                .with(TaskMutators.id(1L))
+                .with(TaskMutators.column(ModelFactory
+                    .createWrapper(ColumnType.MONDAY)
+                    .with(ColumnMutators.id(2L))
+                    .getModel()))
+                .getModel(),
+            ModelFactory
+                .createWrapper(TaskType.MEETING)
+                .with(TaskMutators.id(2L))
+                .with(TaskMutators.column(ModelFactory
+                    .createWrapper(ColumnType.MONDAY)
+                    .with(ColumnMutators.id(2L))
+                    .getModel()))
+                .getModel()
         );
   }
 
@@ -378,21 +430,44 @@ public class TaskServiceTest {
   }
 
   @Test
+  public void delete_whenLastEntity_expectChangeIndexTo0() {
+    Column column = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(2L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    Task job = repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.column(column))
+        .getModel());
+    ColumnMutators.tasks(job).accept(column);
+
+    service.delete(1L, 2L);
+
+    Assertions
+        .assertThat(repository.find(1L))
+        .isNull();
+  }
+
+  @Test
   public void delete_expectChangeIndexToLast() {
-    Column column = ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY)
-        .setId(2L);
-    identification.setStrategy(e -> e.setId(1L));
-    Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.JOB)
-        .setIndex(0)
-        .setColumn(column));
-    identification.setStrategy(e -> e.setId(2L));
-    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
-        .createModel(TaskType.MEETING)
-        .setIndex(1)
-        .setColumn(column));
-    column.setTasks(Lists.newArrayList(job, meeting));
+    Column column = ModelFactory
+        .createWrapper(ColumnType.MONDAY)
+        .with(ColumnMutators.id(2L))
+        .getModel();
+    identification.setStrategy(TaskMutators.id(1L)::accept);
+    Task job = repository.save(ModelFactory
+        .createWrapper(TaskType.JOB)
+        .with(TaskMutators.index(0))
+        .with(TaskMutators.column(column))
+        .getModel());
+    identification.setStrategy(TaskMutators.id(2L)::accept);
+    Task meeting = repository.save(ModelFactory
+        .createWrapper(TaskType.MEETING)
+        .with(TaskMutators.index(1))
+        .with(TaskMutators.column(column))
+        .getModel());
+    ColumnMutators.tasks(job, meeting).accept(column);
 
     service.delete(1L, 2L);
 
@@ -402,13 +477,15 @@ public class TaskServiceTest {
     Assertions
         .assertThat(repository.find(2L))
         .usingComparator(ComparatorFactory.getComparator(Task.class))
-        .isEqualTo(ModelFactoryProducer.getFactory(Task.class)
-            .createModel(TaskType.MEETING)
-            .setId(2L)
-            .setIndex(0)
-            .setColumn(ModelFactoryProducer.getFactory(Column.class)
-                .createModel(ColumnType.MONDAY)
-                .setId(2L)));
+        .isEqualTo(ModelFactory
+            .createWrapper(TaskType.MEETING)
+            .with(TaskMutators.id(2L))
+            .with(TaskMutators.index(0))
+            .with(TaskMutators.column(ModelFactory
+                .createWrapper(ColumnType.MONDAY)
+                .with(ColumnMutators.id(2L))
+                .getModel()))
+            .getModel());
   }
 
 }

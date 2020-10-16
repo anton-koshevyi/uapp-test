@@ -67,7 +67,7 @@ public class ColumnServiceImpl implements ColumnService {
   @Override
   public void delete(Long id) {
     Column entity = this.find(id);
-    Column last = changeIndex(entity, repository.count() - 1);
+    Column last = changeIndex(entity, Math.max(0, repository.count() - 1));
     repository.delete(last);
   }
 

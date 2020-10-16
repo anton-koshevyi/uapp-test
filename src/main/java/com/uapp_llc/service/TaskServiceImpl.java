@@ -84,7 +84,7 @@ public class TaskServiceImpl implements TaskService {
   @Override
   public void delete(Long id, Long columnId) {
     Task entity = this.find(id, columnId);
-    Task last = changeIndex(entity, entity.getColumn().getTasks().size() - 1);
+    Task last = changeIndex(entity, Math.max(0, entity.getColumn().getTasks().size() - 1));
     repository.delete(last);
   }
 

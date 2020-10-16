@@ -2,6 +2,7 @@ package com.uapp_llc.service;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
+import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -377,20 +378,37 @@ public class TaskServiceTest {
   }
 
   @Test
-  public void delete() {
+  public void delete_expectChangeIndexToLast() {
     Column column = ModelFactoryProducer.getFactory(Column.class)
         .createModel(ColumnType.MONDAY)
         .setId(2L);
     identification.setStrategy(e -> e.setId(1L));
-    repository.save(ModelFactoryProducer.getFactory(Task.class)
+    Task job = repository.save(ModelFactoryProducer.getFactory(Task.class)
         .createModel(TaskType.JOB)
+        .setIndex(0)
         .setColumn(column));
+    identification.setStrategy(e -> e.setId(2L));
+    Task meeting = repository.save(ModelFactoryProducer.getFactory(Task.class)
+        .createModel(TaskType.MEETING)
+        .setIndex(1)
+        .setColumn(column));
+    column.setTasks(Lists.newArrayList(job, meeting));
 
     service.delete(1L, 2L);
 
     Assertions
         .assertThat(repository.find(1L))
         .isNull();
+    Assertions
+        .assertThat(repository.find(2L))
+        .usingComparator(ComparatorFactory.getComparator(Task.class))
+        .isEqualTo(ModelFactoryProducer.getFactory(Task.class)
+            .createModel(TaskType.MEETING)
+            .setId(2L)
+            .setIndex(0)
+            .setColumn(ModelFactoryProducer.getFactory(Column.class)
+                .createModel(ColumnType.MONDAY)
+                .setId(2L)));
   }
 
 }

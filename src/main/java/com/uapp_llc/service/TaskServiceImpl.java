@@ -62,10 +62,10 @@ public class TaskServiceImpl implements TaskService {
     }
 
     if (newIndex != null) {
-      changeIndex(entity, newIndex);
+      return changeIndex(entity, newIndex);
+    } else {
+      return repository.save(entity);
     }
-
-    return repository.save(entity);
   }
 
   @Override
@@ -84,14 +84,15 @@ public class TaskServiceImpl implements TaskService {
   @Override
   public void delete(Long id, Long columnId) {
     Task entity = this.find(id, columnId);
-    repository.delete(entity);
+    Task last = changeIndex(entity, entity.getColumn().getTasks().size() - 1);
+    repository.delete(last);
   }
 
-  private void changeIndex(Task entity, Integer index) {
+  private Task changeIndex(Task entity, Integer index) {
     Integer actual = entity.getIndex();
 
     if (actual.equals(index)) {
-      return;
+      return entity;
     }
 
     List<Task> tasks = entity.getColumn().getTasks();
@@ -102,15 +103,20 @@ public class TaskServiceImpl implements TaskService {
 
     if (actual > index) {
       for (int i = index; i < actual; i++) {
-        tasks.get(i).setIndex(i + 1);
+        Task task = tasks.get(i);
+        task.setIndex(i + 1);
+        repository.save(task);
       }
     } else {
       for (int i = index; i > actual; i--) {
-        tasks.get(i).setIndex(i - 1);
+        Task task = tasks.get(i);
+        task.setIndex(i - 1);
+        repository.save(task);
       }
     }
 
     entity.setIndex(index);
+    return repository.save(entity);
   }
 
 }

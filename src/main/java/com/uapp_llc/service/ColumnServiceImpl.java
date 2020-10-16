@@ -48,30 +48,7 @@ public class ColumnServiceImpl implements ColumnService {
   @Override
   public Column changeIndex(Long id, Integer index) {
     Column entity = this.find(id);
-    Integer actual = entity.getIndex();
-
-    if (actual.equals(index)) {
-      return entity;
-    }
-
-    if (index < 0 || index >= repository.count()) {
-      throw new IllegalActionException("New column index out of bounds: " + index);
-    }
-
-    List<Column> columns = repository.findAllByOrderByIndex();
-
-    if (actual > index) {
-      for (int i = index; i < actual; i++) {
-        columns.get(i).setIndex(i + 1);
-      }
-    } else {
-      for (int i = index; i > actual; i--) {
-        columns.get(i).setIndex(i - 1);
-      }
-    }
-
-    entity.setIndex(index);
-    return repository.save(entity);
+    return changeIndex(entity, index);
   }
 
   @Override
@@ -90,7 +67,39 @@ public class ColumnServiceImpl implements ColumnService {
   @Override
   public void delete(Long id) {
     Column entity = this.find(id);
-    repository.delete(entity);
+    Column last = changeIndex(entity, repository.count() - 1);
+    repository.delete(last);
+  }
+
+  private Column changeIndex(Column entity, Integer index) {
+    Integer actual = entity.getIndex();
+
+    if (actual.equals(index)) {
+      return entity;
+    }
+
+    if (index < 0 || index >= repository.count()) {
+      throw new IllegalActionException("New column index out of bounds: " + index);
+    }
+
+    List<Column> columns = repository.findAllByOrderByIndex();
+
+    if (actual > index) {
+      for (int i = index; i < actual; i++) {
+        Column column = columns.get(i);
+        column.setIndex(i + 1);
+        repository.save(column);
+      }
+    } else {
+      for (int i = index; i > actual; i--) {
+        Column column = columns.get(i);
+        column.setIndex(i - 1);
+        repository.save(column);
+      }
+    }
+
+    entity.setIndex(index);
+    return repository.save(entity);
   }
 
 }

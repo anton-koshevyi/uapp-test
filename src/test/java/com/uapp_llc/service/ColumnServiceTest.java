@@ -235,16 +235,28 @@ public class ColumnServiceTest {
   }
 
   @Test
-  public void delete() {
+  public void delete_expectChangeIndexToLast() {
     identification.setStrategy(e -> e.setId(1L));
     repository.save(ModelFactoryProducer.getFactory(Column.class)
-        .createModel(ColumnType.MONDAY));
+        .createModel(ColumnType.MONDAY)
+        .setIndex(0));
+    identification.setStrategy(e -> e.setId(2L));
+    repository.save(ModelFactoryProducer.getFactory(Column.class)
+        .createModel(ColumnType.WEDNESDAY)
+        .setIndex(1));
 
     service.delete(1L);
 
     Assertions
         .assertThat(repository.find(1L))
         .isNull();
+    Assertions
+        .assertThat(repository.find(2L))
+        .usingComparator(ComparatorFactory.getComparator(Column.class))
+        .isEqualTo(ModelFactoryProducer.getFactory(Column.class)
+            .createModel(ColumnType.WEDNESDAY)
+            .setId(2L)
+            .setIndex(0));
   }
 
 }

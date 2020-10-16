@@ -71,6 +71,7 @@ public class ColumnServiceImpl implements ColumnService {
     repository.delete(last);
   }
 
+  @SuppressWarnings("checkstyle:OverloadMethodsDeclarationOrder")
   private Column changeIndex(Column entity, Integer index) {
     Integer actual = entity.getIndex();
 

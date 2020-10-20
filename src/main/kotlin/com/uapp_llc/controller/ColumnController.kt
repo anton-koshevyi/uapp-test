@@ -1,11 +1,5 @@
 package com.uapp_llc.controller
 
-import com.uapp_llc.dto.column.ColumnDto
-import com.uapp_llc.dto.column.ContentDto
-import com.uapp_llc.dto.column.MoveDto
-import com.uapp_llc.mapper.ColumnMapper
-import com.uapp_llc.model.Column
-import com.uapp_llc.service.ColumnService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -18,6 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import com.uapp_llc.dto.column.ColumnDto
+import com.uapp_llc.dto.column.ContentDto
+import com.uapp_llc.dto.column.MoveDto
+import com.uapp_llc.mapper.ColumnMapper
+import com.uapp_llc.service.ColumnService
 
 @RestController
 class ColumnController @Autowired constructor(
@@ -27,42 +26,36 @@ class ColumnController @Autowired constructor(
 ) {
 
   @GetMapping("/columns")
-  fun getAll(@PageableDefault(sort = ["index"]) pageable: Pageable): Page<ColumnDto> {
-    val columns: Page<Column> = columnService.findAll(pageable)
-    return columns.map(ColumnMapper.INSTANCE::toDto)
-  }
+  fun getAll(@PageableDefault(sort = ["index"]) pageable: Pageable): Page<ColumnDto> =
+      columnService.findAll(pageable)
+          .map(ColumnMapper.INSTANCE::toDto)
 
   @PostMapping("/columns")
-  fun create(@RequestBody dto: ContentDto): ColumnDto {
-    // Possible NPE due absent validation
-    val column: Column = columnService.create(dto.name!!)
-    return ColumnMapper.INSTANCE.toDto(column)
-  }
+  fun create(@RequestBody dto: ContentDto): ColumnDto =
+      // Possible NPE due absent validation
+      columnService.create(dto.name!!)
+          .let { ColumnMapper.INSTANCE.toDto(it) }
 
   @GetMapping("/columns/{id}")
-  fun get(@PathVariable id: Long): ColumnDto {
-    val column: Column = columnService.find(id)
-    return ColumnMapper.INSTANCE.toDto(column)
-  }
+  fun get(@PathVariable id: Long): ColumnDto =
+      columnService.find(id)
+          .let { ColumnMapper.INSTANCE.toDto(it) }
 
   @PatchMapping("/columns/{id}")
   fun update(@PathVariable id: Long,
-             @RequestBody dto: ContentDto): ColumnDto {
-    val column: Column = columnService.update(id, dto.name)
-    return ColumnMapper.INSTANCE.toDto(column)
-  }
+             @RequestBody dto: ContentDto): ColumnDto =
+      columnService.update(id, dto.name)
+          .let { ColumnMapper.INSTANCE.toDto(it) }
 
   @PutMapping("/columns/{id}")
   fun changeIndex(@PathVariable id: Long,
-                  @RequestBody dto: MoveDto): ColumnDto {
-    // Possible NPE due absent validation
-    val column: Column = columnService.changeIndex(id, dto.newIndex!!)
-    return ColumnMapper.INSTANCE.toDto(column)
-  }
+                  @RequestBody dto: MoveDto): ColumnDto =
+      // Possible NPE due absent validation
+      columnService.changeIndex(id, dto.newIndex!!)
+          .let { ColumnMapper.INSTANCE.toDto(it) }
 
   @DeleteMapping("/columns/{id}")
-  fun delete(@PathVariable id: Long) {
-    columnService.delete(id)
-  }
+  fun delete(@PathVariable id: Long) =
+      columnService.delete(id)
 
 }

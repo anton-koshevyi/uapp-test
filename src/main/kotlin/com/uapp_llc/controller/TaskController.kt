@@ -1,13 +1,5 @@
 package com.uapp_llc.controller
 
-import com.uapp_llc.dto.task.ContentDto
-import com.uapp_llc.dto.task.MoveDto
-import com.uapp_llc.dto.task.TaskDto
-import com.uapp_llc.mapper.TaskMapper
-import com.uapp_llc.model.Column
-import com.uapp_llc.model.Task
-import com.uapp_llc.service.ColumnService
-import com.uapp_llc.service.TaskService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -20,6 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import com.uapp_llc.dto.task.ContentDto
+import com.uapp_llc.dto.task.MoveDto
+import com.uapp_llc.dto.task.TaskDto
+import com.uapp_llc.mapper.TaskMapper
+import com.uapp_llc.model.Column
+import com.uapp_llc.model.Task
+import com.uapp_llc.service.ColumnService
+import com.uapp_llc.service.TaskService
 
 @RestController
 class TaskController @Autowired constructor(
@@ -31,10 +31,8 @@ class TaskController @Autowired constructor(
 
   @GetMapping("/columns/{columnId}/tasks")
   fun getAll(@PathVariable columnId: Long,
-             @PageableDefault(sort = ["index"]) pageable: Pageable): Page<TaskDto> {
-    val tasks: Page<Task> = taskService.findAll(columnId, pageable)
-    return tasks.map(TaskMapper.INSTANCE::toDto)
-  }
+             @PageableDefault(sort = ["index"]) pageable: Pageable): Page<TaskDto> =
+      taskService.findAll(columnId, pageable).map(TaskMapper.INSTANCE::toDto)
 
   @PostMapping("/columns/{columnId}/tasks")
   fun create(@PathVariable columnId: Long,
@@ -51,23 +49,20 @@ class TaskController @Autowired constructor(
 
   @GetMapping("/columns/{columnId}/tasks/{id}")
   fun get(@PathVariable columnId: Long,
-          @PathVariable id: Long): TaskDto {
-    val task: Task = taskService.find(id, columnId)
-    return TaskMapper.INSTANCE.toDto(task)
-  }
+          @PathVariable id: Long): TaskDto =
+      taskService.find(id, columnId)
+          .let { TaskMapper.INSTANCE.toDto(it) }
 
   @PatchMapping("/columns/{columnId}/tasks/{id}")
   fun update(@PathVariable columnId: Long,
              @PathVariable id: Long,
-             @RequestBody dto: ContentDto): TaskDto {
-    val task: Task = taskService.update(
-        id,
-        columnId,
-        dto.name,
-        dto.description
-    )
-    return TaskMapper.INSTANCE.toDto(task)
-  }
+             @RequestBody dto: ContentDto): TaskDto =
+      taskService.update(
+          id,
+          columnId,
+          dto.name,
+          dto.description
+      ).let { TaskMapper.INSTANCE.toDto(it) }
 
   @PutMapping("/columns/{columnId}/tasks/{id}")
   fun move(@PathVariable columnId: Long,
@@ -89,8 +84,7 @@ class TaskController @Autowired constructor(
 
   @DeleteMapping("/columns/{columnId}/tasks/{id}")
   fun delete(@PathVariable columnId: Long,
-             @PathVariable id: Long) {
-    taskService.delete(id, columnId)
-  }
+             @PathVariable id: Long) =
+      taskService.delete(id, columnId)
 
 }

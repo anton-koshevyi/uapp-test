@@ -1,21 +1,22 @@
 package com.uapp_llc.service
 
-import com.uapp_llc.exception.IllegalActionException
-import com.uapp_llc.exception.NotFoundException
-import com.uapp_llc.model.Column
-import com.uapp_llc.model.Task
-import com.uapp_llc.test.comparator.ComparatorFactory
-import com.uapp_llc.test.model.factory.ModelFactory
-import com.uapp_llc.test.model.type.ColumnType
-import com.uapp_llc.test.model.type.TaskType
-import com.uapp_llc.test.stub.repository.TaskRepositoryStub
-import com.uapp_llc.test.stub.repository.identification.IdentificationContext
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.data.domain.Pageable
+import com.uapp_llc.exception.IllegalActionException
+import com.uapp_llc.exception.NotFoundException
+import com.uapp_llc.model.Column
+import com.uapp_llc.model.Task
+import com.uapp_llc.test.comparator.ComparatorFactory
+import com.uapp_llc.test.comparator.NotNullComparator
+import com.uapp_llc.test.model.factory.ModelFactory
+import com.uapp_llc.test.model.type.ColumnType
+import com.uapp_llc.test.model.type.TaskType
+import com.uapp_llc.test.stub.repository.TaskRepositoryStub
+import com.uapp_llc.test.stub.repository.identification.IdentificationContext
 
 class TaskServiceTest {
 
@@ -42,6 +43,7 @@ class TaskServiceTest {
     Assertions
         .assertThat(repository.find(1L))
         .usingComparator(ComparatorFactory.getComparator(Task::class.java))
+        .usingComparatorForFields(NotNullComparator.leftNotNull(), "createdAt")
         .isEqualTo(ModelFactory
             .createModel(TaskType.JOB)
             .also {
@@ -77,6 +79,8 @@ class TaskServiceTest {
     Assertions
         .assertThat(repository.find(1L))
         .usingComparator(ComparatorFactory.getComparator(Task::class.java))
+        .usingComparatorForFields(
+            NotNullComparator.leftNotNull(), "createdAt", "updatedAt")
         .isEqualTo(ModelFactory
             .createModel(TaskType.JOB)
             .also {
@@ -149,6 +153,8 @@ class TaskServiceTest {
     Assertions
         .assertThat(repository.findAll())
         .usingElementComparator(ComparatorFactory.getComparator(Task::class.java))
+        .usingComparatorForElementFieldsWithNames(
+            NotNullComparator.leftNotNull(), "createdAt")
         .containsExactlyInAnyOrder(
             ModelFactory
                 .createModel(TaskType.JOB)
@@ -197,6 +203,8 @@ class TaskServiceTest {
     Assertions
         .assertThat(repository.findAll())
         .usingElementComparator(ComparatorFactory.getComparator(Task::class.java))
+        .usingComparatorForElementFieldsWithNames(
+            NotNullComparator.leftNotNull(), "createdAt")
         .containsExactlyInAnyOrder(
             ModelFactory
                 .createModel(TaskType.JOB)
@@ -245,6 +253,8 @@ class TaskServiceTest {
     Assertions
         .assertThat(repository.findAll())
         .usingElementComparator(ComparatorFactory.getComparator(Task::class.java))
+        .usingComparatorForElementFieldsWithNames(
+            NotNullComparator.leftNotNull(), "createdAt")
         .containsExactlyInAnyOrder(
             ModelFactory
                 .createModel(TaskType.JOB)
@@ -288,6 +298,7 @@ class TaskServiceTest {
     Assertions
         .assertThat(service.move(1L, 1L, wednesday, null))
         .usingComparator(ComparatorFactory.getComparator(Task::class.java))
+        .usingComparatorForFields(NotNullComparator.leftNotNull(), "createdAt")
         .isEqualTo(ModelFactory
             .createModel(TaskType.JOB)
             .also {
@@ -320,6 +331,7 @@ class TaskServiceTest {
     Assertions
         .assertThat(service.move(1L, 1L, wednesday, 0))
         .usingComparator(ComparatorFactory.getComparator(Task::class.java))
+        .usingComparatorForFields(NotNullComparator.leftNotNull(), "createdAt")
         .isEqualTo(ModelFactory
             .createModel(TaskType.JOB)
             .also {
@@ -352,6 +364,7 @@ class TaskServiceTest {
     Assertions
         .assertThat(service.find(1L, 1L))
         .usingComparator(ComparatorFactory.getComparator(Task::class.java))
+        .usingComparatorForFields(NotNullComparator.leftNotNull(), "createdAt")
         .isEqualTo(ModelFactory
             .createModel(TaskType.JOB)
             .also {
@@ -379,6 +392,7 @@ class TaskServiceTest {
     Assertions
         .assertThat(service.findAll(1L, Pageable.unpaged()))
         .usingElementComparator(ComparatorFactory.getComparator(Task::class.java))
+        .usingComparatorForElementFieldsWithNames(NotNullComparator.leftNotNull(), "createdAt")
         .containsExactlyInAnyOrder(
             ModelFactory
                 .createModel(TaskType.JOB)
@@ -456,6 +470,7 @@ class TaskServiceTest {
     Assertions
         .assertThat(repository.find(2L))
         .usingComparator(ComparatorFactory.getComparator(Task::class.java))
+        .usingComparatorForFields(NotNullComparator.leftNotNull(), "createdAt")
         .isEqualTo(ModelFactory
             .createModel(TaskType.MEETING)
             .also {

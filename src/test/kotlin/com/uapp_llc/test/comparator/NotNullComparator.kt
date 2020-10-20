@@ -26,20 +26,23 @@ class NotNullComparator<T> private constructor(
 
   companion object {
 
-    private val left: NotNullComparator<Any> = NotNullComparator(leftNotNull = true, rightNotNull = false)
-    private val right: NotNullComparator<Any> = NotNullComparator(leftNotNull = false, rightNotNull = true)
-    private val bot: NotNullComparator<Any> = NotNullComparator(leftNotNull = true, rightNotNull = true)
+    private val left: NotNullComparator<Any> =
+        NotNullComparator(leftNotNull = true, rightNotNull = false)
+    private val right: NotNullComparator<Any> =
+        NotNullComparator(leftNotNull = false, rightNotNull = true)
+    private val bot: NotNullComparator<Any> =
+        NotNullComparator(leftNotNull = true, rightNotNull = true)
 
-    fun <T> leftNotNull(): NotNullComparator<T> {
-      return left as NotNullComparator<T>
+    fun <T> leftNotNull(): NotNullComparator<in T> {
+      return left as NotNullComparator<in T>
     }
 
-    fun <T> rightNotNull(): NotNullComparator<T> {
-      return right as NotNullComparator<T>
+    fun <T> rightNotNull(): NotNullComparator<in T> {
+      return right as NotNullComparator<in T>
     }
 
-    fun <T> bothNotNull(): NotNullComparator<T> {
-      return bot as NotNullComparator<T>
+    fun <T> bothNotNull(): NotNullComparator<in T> {
+      return bot as NotNullComparator<in T>
     }
 
   }

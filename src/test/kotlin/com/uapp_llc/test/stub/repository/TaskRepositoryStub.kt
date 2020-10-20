@@ -21,7 +21,7 @@ class TaskRepositoryStub(
   override fun findByIdAndColumnId(id: Long, columnId: Long): Task? {
     return super.find {
       listOf(byId(id), byColumnId(columnId))
-          .all { p -> p.invoke(it) }
+          .all { p -> p(it) }
     }
   }
 

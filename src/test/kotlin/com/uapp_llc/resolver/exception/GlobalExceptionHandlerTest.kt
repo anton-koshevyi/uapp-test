@@ -34,13 +34,13 @@ class GlobalExceptionHandlerTest {
         .then()
         .statusCode(HttpServletResponse.SC_BAD_REQUEST)
         .expect(ResultMatcher.matchAll(
-            ResultMatcher {
+            {
               Assertions
                   .assertThat(it.resolvedException)
                   .isInstanceOf(LocalizedException::class.java)
                   .hasMessage("Localized error")
             },
-            ResultMatcher {
+            {
               Assertions
                   .assertThat(it.response)
                   .hasFieldOrPropertyWithValue("getErrorMessage", "Localized error")

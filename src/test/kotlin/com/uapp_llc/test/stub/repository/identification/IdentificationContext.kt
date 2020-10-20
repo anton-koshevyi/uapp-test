@@ -6,10 +6,8 @@ class IdentificationContext<T>(
 
 ) : Identification<T> {
 
-  fun setStrategy(strategy: (T) -> Unit) {
-    this.strategy = object : Identification<T> {
-      override fun apply(entity: T) = strategy(entity)
-    }
+  fun setStrategy(strategy: Identification<T>) {
+    this.strategy = strategy
   }
 
   override fun apply(entity: T) = strategy!!.apply(entity)

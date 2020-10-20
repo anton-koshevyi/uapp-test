@@ -31,5 +31,4 @@ class ColumnRepositoryStub(
 
   override fun delete(entity: Column) = super.delete(entity)
 
-
 }

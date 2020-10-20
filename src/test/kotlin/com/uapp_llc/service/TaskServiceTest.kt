@@ -37,11 +37,7 @@ class TaskServiceTest {
         .also { it.id = 2L }
     identification.setStrategy { it.id = 1L }
 
-    service.create(
-        column,
-        "Job",
-        "Go to job"
-    )
+    service.create(column, "Job", "Go to job")
 
     Assertions
         .assertThat(repository.find(1L))
@@ -76,12 +72,7 @@ class TaskServiceTest {
           it.column = column
         })
 
-    service.update(
-        1L,
-        2L,
-        "Meeting",
-        "Meet John"
-    )
+    service.update(1L, 2L, "Meeting", "Meet John")
 
     Assertions
         .assertThat(repository.find(1L))

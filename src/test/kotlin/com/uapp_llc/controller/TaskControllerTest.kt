@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.Customization
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
-import org.skyscreamer.jsonassert.ValueMatcher
 import org.skyscreamer.jsonassert.comparator.CustomComparator
 import org.springframework.context.support.GenericApplicationContext
 import org.springframework.data.web.config.EnableSpringDataWebSupport
@@ -109,7 +108,7 @@ class TaskControllerTest {
     // For some reason fails when not strict array ordering
     JSONAssert
         .assertEquals(expected, actual, CustomComparator(JSONCompareMode.STRICT,
-            Customization("[*].createdAt", ValueMatcher { act, _ -> act != null })
+            Customization("[*].createdAt") { act, _ -> act != null }
         ))
   }
 
@@ -154,7 +153,7 @@ class TaskControllerTest {
         """
     JSONAssert
         .assertEquals(expected, actual, CustomComparator(JSONCompareMode.NON_EXTENSIBLE,
-            Customization("createdAt", ValueMatcher { act, _ -> act != null })
+            Customization("createdAt") { act, _ -> act != null }
         ))
   }
 
@@ -195,7 +194,7 @@ class TaskControllerTest {
         """
     JSONAssert
         .assertEquals(expected, actual, CustomComparator(JSONCompareMode.NON_EXTENSIBLE,
-            Customization("createdAt", ValueMatcher { act, _ -> act != null })
+            Customization("createdAt") { act, _ -> act != null }
         ))
   }
 
@@ -243,7 +242,7 @@ class TaskControllerTest {
         """
     JSONAssert
         .assertEquals(expected, actual, CustomComparator(JSONCompareMode.NON_EXTENSIBLE,
-            Customization("createdAt", ValueMatcher { act, _ -> act != null })
+            Customization("createdAt") { act, _ -> act != null }
         ))
   }
 
@@ -300,7 +299,7 @@ class TaskControllerTest {
        """.trimIndent()
     JSONAssert
         .assertEquals(expected, actual, CustomComparator(JSONCompareMode.NON_EXTENSIBLE,
-            Customization("createdAt", ValueMatcher { act, _ -> act != null })
+            Customization("createdAt") { act, _ -> act != null }
         ))
   }
 

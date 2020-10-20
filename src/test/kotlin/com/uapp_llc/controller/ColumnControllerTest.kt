@@ -49,7 +49,6 @@ class ColumnControllerTest {
           register(ColumnController::class.java)
           refresh()
         }
-    RestAssuredMockMvc.enableLoggingOfRequestAndResponseIfValidationFails()
 
     RestAssuredMockMvc.mockMvc(MockMvcBuilders
         .webAppContextSetup(webContext)

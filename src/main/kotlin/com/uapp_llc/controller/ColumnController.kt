@@ -55,6 +55,7 @@ class ColumnController @Autowired constructor(
   @PutMapping("/columns/{id}")
   fun changeIndex(@PathVariable id: Long,
                   @RequestBody dto: MoveDto): ColumnDto {
+    // Possible NPE due absent validation
     val column: Column = columnService.changeIndex(id, dto.newIndex!!)
     return ColumnMapper.INSTANCE.toDto(column)
   }

@@ -1,10 +1,10 @@
 plugins {
   id("org.gradle.jacoco")
-  id("org.jetbrains.kotlin.jvm") version "1.3.72"
-  id("org.jetbrains.kotlin.kapt") version "1.3.72"
-  id("org.jetbrains.kotlin.plugin.allopen") version "1.3.72"
-  id("org.jetbrains.kotlin.plugin.noarg") version "1.3.72"
-  id("org.jetbrains.kotlin.plugin.spring") version "1.3.72"
+  id("org.jetbrains.kotlin.jvm") version "1.4.10"
+  id("org.jetbrains.kotlin.kapt") version "1.4.10"
+  id("org.jetbrains.kotlin.plugin.allopen") version "1.4.10"
+  id("org.jetbrains.kotlin.plugin.noarg") version "1.4.10"
+  id("org.jetbrains.kotlin.plugin.spring") version "1.4.10"
   id("org.springframework.boot") version "2.2.0.RELEASE"
 }
 
@@ -21,8 +21,8 @@ dependencies {
   // Common
   implementation("com.google.guava:guava:29.0-jre")
   implementation("org.apache.commons:commons-lang3:3.9")
-  implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.72")
-  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72")
+  implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.10")
+  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.10")
   implementation("org.mapstruct:mapstruct:1.4.1.Final")
   kapt("org.mapstruct:mapstruct-processor:1.4.1.Final")
   implementation("org.yaml:snakeyaml:1.25")

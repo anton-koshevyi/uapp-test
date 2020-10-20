@@ -36,11 +36,6 @@ jobs:
           ./gradlew test
           ./gradlew jacocoTestReport
 
-      - name: Check
-        run: |
-          ./gradlew checkstyleMain
-          ./gradlew checkstyleTest
-
       - name: Report
         if: always()
         run: |

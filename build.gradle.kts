@@ -1,8 +1,11 @@
 plugins {
-  java
-  jacoco
-  checkstyle
-  id("org.springframework.boot").version("2.2.0.RELEASE")
+  id("org.gradle.jacoco")
+  id("org.jetbrains.kotlin.jvm") version "1.3.72"
+  id("org.jetbrains.kotlin.kapt") version "1.3.72"
+  id("org.jetbrains.kotlin.plugin.allopen") version "1.3.72"
+  id("org.jetbrains.kotlin.plugin.noarg") version "1.3.72"
+  id("org.jetbrains.kotlin.plugin.spring") version "1.3.72"
+  id("org.springframework.boot") version "2.2.0.RELEASE"
 }
 
 repositories {
@@ -18,10 +21,10 @@ dependencies {
   // Common
   implementation("com.google.guava:guava:29.0-jre")
   implementation("org.apache.commons:commons-lang3:3.9")
-  implementation("org.mapstruct:mapstruct:1.3.1.Final")
-  annotationProcessor("org.mapstruct:mapstruct-processor:1.3.1.Final")
-  implementation("org.projectlombok:lombok:1.18.12")
-  annotationProcessor("org.projectlombok:lombok:1.18.12")
+  implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.72")
+  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72")
+  implementation("org.mapstruct:mapstruct:1.4.1.Final")
+  kapt("org.mapstruct:mapstruct-processor:1.4.1.Final")
   implementation("org.yaml:snakeyaml:1.25")
 
   // Data
@@ -55,15 +58,21 @@ dependencies {
 
 }
 
-java {
-  sourceCompatibility = JavaVersion.VERSION_1_8
-}
-
-checkstyle {
-  toolVersion = "8.32"
+allOpen {
+  annotation("javax.persistence.Entity")
+  annotation("javax.persistence.MappedSuperclass")
+  annotation("javax.persistence.Embeddable")
 }
 
 tasks {
+  compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+  }
+
+  compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+  }
+
   test {
     useJUnitPlatform()
   }

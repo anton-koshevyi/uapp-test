@@ -9,6 +9,7 @@ class FactoryProducer private constructor() {
 
     private val typeFactories: MutableMap<String, AbstractFactory<*>> = mutableMapOf()
 
+    @JvmStatic
     fun <T> getFactory(type: Class<T>): AbstractFactory<T> {
       val typeName: String = type.typeName
 

@@ -5,7 +5,6 @@ import java.util.Comparator
 class NotNullComparator<T> private constructor(
 
     private val leftNotNull: Boolean,
-
     private val rightNotNull: Boolean
 
 ) : Comparator<T> {
@@ -33,14 +32,17 @@ class NotNullComparator<T> private constructor(
     private val bot: NotNullComparator<Any> =
         NotNullComparator(leftNotNull = true, rightNotNull = true)
 
+    @JvmStatic
     fun <T> leftNotNull(): NotNullComparator<in T> {
       return left as NotNullComparator<in T>
     }
 
+    @JvmStatic
     fun <T> rightNotNull(): NotNullComparator<in T> {
       return right as NotNullComparator<in T>
     }
 
+    @JvmStatic
     fun <T> bothNotNull(): NotNullComparator<in T> {
       return bot as NotNullComparator<in T>
     }

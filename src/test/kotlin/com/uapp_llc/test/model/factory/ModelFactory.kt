@@ -6,6 +6,7 @@ class ModelFactory private constructor() {
 
   companion object {
 
+    @JvmStatic
     fun <T> createModel(type: ModelType<T>): T {
       val modelClass: Class<T> = type.modelClass()
       return FactoryProducer.getFactory(modelClass).createModel(type)

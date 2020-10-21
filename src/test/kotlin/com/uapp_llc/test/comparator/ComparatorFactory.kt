@@ -1,8 +1,8 @@
 package com.uapp_llc.test.comparator
 
+import java.util.Comparator
 import com.uapp_llc.model.Column
 import com.uapp_llc.model.Task
-import java.util.Comparator
 
 class ComparatorFactory private constructor() {
 
@@ -10,6 +10,7 @@ class ComparatorFactory private constructor() {
 
     private val typeComparators: MutableMap<String, Comparator<*>> = mutableMapOf()
 
+    @JvmStatic
     fun <T> getComparator(type: Class<in T>): Comparator<in T?> {
       val typeName: String = type.name
 

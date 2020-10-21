@@ -1,9 +1,9 @@
 package com.uapp_llc.mapper
 
-import com.uapp_llc.dto.task.TaskDto
-import com.uapp_llc.model.Task
 import org.mapstruct.Mapper
 import org.mapstruct.factory.Mappers
+import com.uapp_llc.dto.task.TaskDto
+import com.uapp_llc.model.Task
 
 @Mapper(uses = [ColumnMapper::class])
 interface TaskMapper {
@@ -12,7 +12,10 @@ interface TaskMapper {
 
 
   companion object {
+
+    @JvmField
     val INSTANCE: TaskMapper = Mappers.getMapper(TaskMapper::class.java)
+
   }
 
 }

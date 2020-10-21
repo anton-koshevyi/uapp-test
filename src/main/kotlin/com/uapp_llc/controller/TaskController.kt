@@ -70,9 +70,10 @@ class TaskController @Autowired constructor(
            @RequestBody dto: MoveDto): TaskDto {
     val newColumnId: Long? = dto.newColumnId
     val newColumn: Column? =
-        if (newColumnId != null && newColumnId != columnId)
+        if (newColumnId != null && newColumnId != columnId) {
           columnService.find(newColumnId)
-        else null
+        } else null
+
     val task: Task = taskService.move(
         id,
         columnId,

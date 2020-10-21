@@ -1,8 +1,8 @@
 package com.uapp_llc.repository
 
-import com.uapp_llc.model.Task
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import com.uapp_llc.model.Task
 
 interface TaskRepository {
 

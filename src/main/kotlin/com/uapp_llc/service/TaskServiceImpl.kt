@@ -1,16 +1,16 @@
 package com.uapp_llc.service
 
-import com.uapp_llc.exception.IllegalActionException
-import com.uapp_llc.exception.NotFoundException
-import com.uapp_llc.model.Column
-import com.uapp_llc.model.Task
-import com.uapp_llc.repository.TaskRepository
+import kotlin.math.max
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import kotlin.math.max
+import com.uapp_llc.exception.IllegalActionException
+import com.uapp_llc.exception.NotFoundException
+import com.uapp_llc.model.Column
+import com.uapp_llc.model.Task
+import com.uapp_llc.repository.TaskRepository
 
 @Service
 class TaskServiceImpl @Autowired constructor(
@@ -61,14 +61,12 @@ class TaskServiceImpl @Autowired constructor(
     }
   }
 
-  override fun find(id: Long, columnId: Long): Task {
-    return repository.findByIdAndColumnId(id, columnId)
-        ?: throw NotFoundException("No task for id '$id' and column id '$columnId'")
-  }
+  override fun find(id: Long, columnId: Long): Task =
+      repository.findByIdAndColumnId(id, columnId)
+          ?: throw NotFoundException("No task for id '$id' and column id '$columnId'")
 
-  override fun findAll(columnId: Long, pageable: Pageable): Page<Task> {
-    return repository.findAllByColumnId(columnId, pageable)
-  }
+  override fun findAll(columnId: Long, pageable: Pageable): Page<Task> =
+      repository.findAllByColumnId(columnId, pageable)
 
   @Transactional
   override fun delete(id: Long, columnId: Long) {

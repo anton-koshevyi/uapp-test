@@ -1,15 +1,15 @@
 package com.uapp_llc.service
 
-import com.uapp_llc.exception.IllegalActionException
-import com.uapp_llc.exception.NotFoundException
-import com.uapp_llc.model.Column
-import com.uapp_llc.repository.ColumnRepository
+import kotlin.math.max
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import kotlin.math.max
+import com.uapp_llc.exception.IllegalActionException
+import com.uapp_llc.exception.NotFoundException
+import com.uapp_llc.model.Column
+import com.uapp_llc.repository.ColumnRepository
 
 @Service
 class ColumnServiceImpl @Autowired constructor(
@@ -44,14 +44,12 @@ class ColumnServiceImpl @Autowired constructor(
     return changeIndex(entity, index)
   }
 
-  override fun find(id: Long): Column {
-    return repository.findById(id)
-        ?: throw NotFoundException("No column for id '$id'")
-  }
+  override fun find(id: Long): Column =
+      repository.findById(id)
+          ?: throw NotFoundException("No column for id '$id'")
 
-  override fun findAll(pageable: Pageable): Page<Column> {
-    return repository.findAll(pageable)
-  }
+  override fun findAll(pageable: Pageable): Page<Column> =
+      repository.findAll(pageable)
 
   @Transactional
   override fun delete(id: Long) {
@@ -60,7 +58,6 @@ class ColumnServiceImpl @Autowired constructor(
     repository.delete(last)
   }
 
-  @SuppressWarnings("checkstyle:OverloadMethodsDeclarationOrder")
   private fun changeIndex(entity: Column, index: Int): Column {
     val actual: Int = entity.index
 

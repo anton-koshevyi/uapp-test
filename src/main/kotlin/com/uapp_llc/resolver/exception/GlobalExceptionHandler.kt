@@ -1,11 +1,11 @@
 package com.uapp_llc.resolver.exception
 
-import com.uapp_llc.exception.LocalizedException
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import com.uapp_llc.exception.LocalizedException
 
 @Component
 class GlobalExceptionHandler : DefaultHandlerExceptionResolver() {

@@ -29,7 +29,7 @@ class NotNullComparator<T> private constructor(
         NotNullComparator(leftNotNull = true, rightNotNull = false)
     private val right: NotNullComparator<Any> =
         NotNullComparator(leftNotNull = false, rightNotNull = true)
-    private val bot: NotNullComparator<Any> =
+    private val both: NotNullComparator<Any> =
         NotNullComparator(leftNotNull = true, rightNotNull = true)
 
     @JvmStatic
@@ -44,7 +44,7 @@ class NotNullComparator<T> private constructor(
 
     @JvmStatic
     fun <T> bothNotNull(): NotNullComparator<in T> {
-      return bot as NotNullComparator<in T>
+      return both as NotNullComparator<in T>
     }
 
   }

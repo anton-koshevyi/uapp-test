@@ -36,6 +36,9 @@ jobs:
           ./gradlew test
           ./gradlew jacocoTestReport
 
+      - name: 'Check: detekt'
+        run: ./gradlew detekt
+
       - name: Report
         if: always()
         run: |

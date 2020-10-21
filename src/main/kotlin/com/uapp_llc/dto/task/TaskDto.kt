@@ -1,7 +1,7 @@
 package com.uapp_llc.dto.task;
 
-import com.uapp_llc.dto.column.ColumnDto
 import java.util.Date
+import com.uapp_llc.dto.column.ColumnDto
 
 class TaskDto(
 

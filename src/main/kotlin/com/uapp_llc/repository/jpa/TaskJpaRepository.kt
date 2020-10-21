@@ -1,9 +1,9 @@
 package com.uapp_llc.repository.jpa
 
-import com.uapp_llc.model.Task
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import com.uapp_llc.model.Task
 
 interface TaskJpaRepository : JpaRepository<Task, Long> {
 

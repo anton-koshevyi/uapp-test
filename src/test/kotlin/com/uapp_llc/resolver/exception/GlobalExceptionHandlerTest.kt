@@ -1,6 +1,6 @@
 package com.uapp_llc.resolver.exception
 
-import com.uapp_llc.exception.LocalizedException
+import javax.servlet.http.HttpServletResponse
 import io.restassured.module.mockmvc.RestAssuredMockMvc
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder
 import org.springframework.web.bind.annotation.GetMapping
-import javax.servlet.http.HttpServletResponse
+import com.uapp_llc.exception.LocalizedException
 
 class GlobalExceptionHandlerTest {
 
@@ -73,7 +73,6 @@ class GlobalExceptionHandlerTest {
     private fun localized(): Nothing = throw object : LocalizedException("Localized error") {
       override fun getStatusCode(): Int = HttpServletResponse.SC_BAD_REQUEST
     }
-
 
     @GetMapping("/global")
     private fun global(): Nothing = throw RuntimeException("Global error")

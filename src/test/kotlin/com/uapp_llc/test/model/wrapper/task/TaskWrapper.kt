@@ -1,8 +1,8 @@
 package com.uapp_llc.test.model.wrapper.task
 
+import java.time.ZonedDateTime
 import com.uapp_llc.model.Task
 import com.uapp_llc.test.model.wrapper.ModelWrapper
-import java.time.ZonedDateTime
 
 abstract class TaskWrapper constructor(
 

@@ -1,9 +1,9 @@
 package com.uapp_llc.service
 
-import com.uapp_llc.model.Column
-import com.uapp_llc.model.Task
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import com.uapp_llc.model.Column
+import com.uapp_llc.model.Task
 
 interface TaskService {
 

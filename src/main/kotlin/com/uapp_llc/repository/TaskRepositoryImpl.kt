@@ -1,11 +1,11 @@
 package com.uapp_llc.repository
 
-import com.uapp_llc.model.Task
-import com.uapp_llc.repository.jpa.TaskJpaRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
+import com.uapp_llc.model.Task
+import com.uapp_llc.repository.jpa.TaskJpaRepository
 
 @Repository
 class TaskRepositoryImpl @Autowired constructor(

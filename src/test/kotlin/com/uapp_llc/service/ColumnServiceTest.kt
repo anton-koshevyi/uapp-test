@@ -1,5 +1,11 @@
 package com.uapp_llc.service
 
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import org.springframework.data.domain.Pageable
 import com.uapp_llc.exception.IllegalActionException
 import com.uapp_llc.exception.NotFoundException
 import com.uapp_llc.model.Column
@@ -8,12 +14,6 @@ import com.uapp_llc.test.model.factory.ModelFactory
 import com.uapp_llc.test.model.type.ColumnType
 import com.uapp_llc.test.stub.repository.ColumnRepositoryStub
 import com.uapp_llc.test.stub.repository.identification.IdentificationContext
-import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
-import org.springframework.data.domain.Pageable
 
 class ColumnServiceTest {
 

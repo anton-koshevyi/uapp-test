@@ -24,7 +24,6 @@ dependencies {
   implementation("com.google.guava:guava:29.0-jre")
   implementation("org.apache.commons:commons-lang3:3.9")
   implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.10")
-  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.10")
   implementation("org.mapstruct:mapstruct:1.4.1.Final")
   kapt("org.mapstruct:mapstruct-processor:1.4.1.Final")
   implementation("org.yaml:snakeyaml:1.25")

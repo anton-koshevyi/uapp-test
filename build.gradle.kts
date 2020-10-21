@@ -58,12 +58,6 @@ dependencies {
 
 }
 
-allOpen {
-  annotation("javax.persistence.Entity")
-  annotation("javax.persistence.MappedSuperclass")
-  annotation("javax.persistence.Embeddable")
-}
-
 tasks {
   compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
